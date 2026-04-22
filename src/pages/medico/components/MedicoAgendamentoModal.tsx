@@ -123,6 +123,13 @@ export function MedicoAgendamentoModal({
 
   const handleAddPaciente = () => {
     if (!nome || !telefone || !duration) return
+    if (duration < 60) {
+      toast({
+        title: 'Duração mínima da consulta: 1 hora',
+        variant: 'destructive',
+      })
+      return
+    }
     const newTotal = usedMins + duration
     if (newTotal > totalReservaMins) {
       toast({
@@ -265,7 +272,7 @@ export function MedicoAgendamentoModal({
                   <Label>Duração (min)</Label>
                   <Input
                     type="number"
-                    min={15}
+                    min={60}
                     step={15}
                     value={duration}
                     onChange={(e) => setDuration(Number(e.target.value))}

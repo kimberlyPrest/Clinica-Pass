@@ -118,7 +118,7 @@ export function AgendamentoCreateForm({ reserva, onSuccess, onCancel, setIsDirty
     if (!nome) err.nome = 'Nome é obrigatório'
     if (!telefone) err.telefone = 'Telefone é obrigatório'
     if (!horaInicio) err.horaInicio = 'Hora é obrigatória'
-    if (!duracao || Number(duracao) < 1) err.duracao = 'Mínimo de 1 hora'
+    if (!duracao || Number(duracao) < 1) err.duracao = 'Duração mínima da consulta: 1 hora'
     if (Object.keys(err).length > 0) return setErrors(err)
 
     const resDate = reserva.data_inicio.split('T')[0] || reserva.data_inicio.split(' ')[0]

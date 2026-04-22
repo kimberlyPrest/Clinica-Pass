@@ -1,5 +1,39 @@
 import pb from '@/lib/pocketbase/client'
-import { verificarHorarioBloqueado } from '@/services/bloqueios'
+import { verificarHorarioBloqueado, verificarHorarioBloqueadoSync } from '@/services/bloqueios'
+
+export const verificarSalasLivres = async (
+  dataStr: string,
+  horaInicio: string,
+  horaFim: string,
+) => {
+  const salas = await pb.collection('salas').getFullList({ filter: "status='ativa'" })
+  const bloqueios = await pb.collection('bloqueios').getFullList()
+  const reservas = await pb.collection('reservas').getFullList({ filter: "status='ativa'" })
+
+  const start = new Date(`${dataStr}T${horaInicio}:00`)
+  const end = new Date(`${dataStr}T${horaFim}:00`)
+
+  return salas.filter((sala) => {
+    const isBlocked = verificarHorarioBloqueadoSync(
+      sala.id,
+      start,
+      horaInicio,
+      horaFim,
+      bloqueios as any,
+    )
+    if (isBlocked) return false
+
+    const conflict = reservas.some((r) => {
+      if (r.sala_id !== sala.id) return false
+      const rStart = new Date(r.data_inicio)
+      const rEnd = new Date(r.data_fim)
+      return start < rEnd && end > rStart
+    })
+    if (conflict) return false
+
+    return true
+  })
+}
 
 export const getAgendamentosPorMedico = async (medicoId: string) => {
   return pb.collection('agendamentos').getFullList({

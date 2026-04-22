@@ -71,7 +71,7 @@ export function AgendamentoEditForm({ agendamento, onSuccess, onCancel, setIsDir
     if (!telefone) err.telefone = 'Telefone é obrigatório'
     if (!data) err.data = 'Data é obrigatória'
     if (!horaInicio) err.horaInicio = 'Hora é obrigatória'
-    if (!duracao || Number(duracao) < 1) err.duracao = 'Mínimo de 1 hora'
+    if (!duracao || Number(duracao) < 1) err.duracao = 'Duração mínima da consulta: 1 hora'
     if (Object.keys(err).length > 0) return setErrors(err)
 
     const newStart = new Date(`${data}T${horaInicio}:00`)
