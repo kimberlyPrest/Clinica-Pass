@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
+import { Trash2 } from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -17,6 +18,7 @@ export function CamposCustomizadosTable() {
   const { user } = useAuth()
   const { toast } = useToast()
   const [fields, setFields] = useState<any[]>([])
+  const [deletedFields, setDeletedFields] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [medicos, setMedicos] = useState<any[]>([])
   const [selectedMedico, setSelectedMedico] = useState<string>('')
@@ -70,6 +72,12 @@ export function CamposCustomizadosTable() {
   const handleSave = async () => {
     try {
       setLoading(true)
+
+      for (const id of deletedFields) {
+        await pb.collection('medico_campos_customizados').delete(id)
+      }
+      setDeletedFields([])
+
       for (const field of fields) {
         const payload = {
           medico_id: selectedMedico,
@@ -84,10 +92,10 @@ export function CamposCustomizadosTable() {
           await pb.collection('medico_campos_customizados').update(field.id, payload)
         }
       }
-      toast({ title: 'Campos customizados salvos' })
+      toast({ title: 'Campos customizados salvos com sucesso!' })
       loadFields(selectedMedico)
     } catch (e: any) {
-      toast({ title: 'Erro ao salvar', variant: 'destructive' })
+      toast({ title: 'Erro ao salvar', description: e.message, variant: 'destructive' })
     } finally {
       setLoading(false)
     }
@@ -95,6 +103,17 @@ export function CamposCustomizadosTable() {
 
   const updateField = (id: string, key: string, value: any) => {
     setFields(fields.map((f) => (f.id === id ? { ...f, [key]: value } : f)))
+  }
+
+  const handleDelete = (id: string) => {
+    if (!id.startsWith('new-')) {
+      setDeletedFields([...deletedFields, id])
+    }
+    setFields(fields.filter((f) => f.id !== id))
+    toast({
+      title: 'Campo removido',
+      description: 'Clique em salvar para confirmar as alterações.',
+    })
   }
 
   const addField = () => {
@@ -164,6 +183,14 @@ export function CamposCustomizadosTable() {
                 onChange={(e) => updateField(f.id, 'ordem', e.target.value)}
               />
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-red-500 hover:text-red-700 hover:bg-red-50"
+              onClick={() => handleDelete(f.id)}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
           </div>
         ))}
       </div>
