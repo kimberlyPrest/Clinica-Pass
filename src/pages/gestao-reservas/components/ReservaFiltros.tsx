@@ -133,14 +133,14 @@ export function ReservaFiltros(props: any) {
 
         <MultiSelect
           title="Médicos"
-          options={medicos.map((m: any) => ({ value: m.id, label: m.nome }))}
-          selected={medicoFilter}
+          options={(medicos || []).map((m: any) => ({ value: m.id, label: m.nome }))}
+          selected={medicoFilter || []}
           onChange={setMedicoFilter}
         />
         <MultiSelect
           title="Salas"
-          options={salas.map((s: any) => ({ value: s.id, label: s.nome }))}
-          selected={salaFilter}
+          options={(salas || []).map((s: any) => ({ value: s.id, label: s.nome }))}
+          selected={salaFilter || []}
           onChange={setSalaFilter}
         />
       </div>
