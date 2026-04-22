@@ -1,10 +1,12 @@
 export type Period = 'Dia' | 'Semana' | 'Mês'
 
-export interface DashboardFilters {
-  period: Period
-  rooms: string[]
-  doctorTypes: string[]
-  occupancy: number[]
+export interface KpiData {
+  occupancyRate: number
+  activeDoctors: number
+  availableRooms: number
+  upcomingAppointments: number
+  totalPatients: number
+  todayAppointments: number
 }
 
 export interface Appointment {
@@ -19,9 +21,6 @@ export interface Appointment {
   status: 'Confirmado' | 'Aguardando' | 'Realizado'
 }
 
-export interface KpiData {
-  occupancyRate: number
-  activeDoctors: number
-  availableRooms: number
-  upcomingAppointments: number
+export interface DashboardFilters {
+  period: Period
 }

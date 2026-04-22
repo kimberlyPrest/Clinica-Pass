@@ -50,6 +50,8 @@ export interface DashboardKpiData {
   activeDoctors: number
   availableRooms: number
   upcomingAppointments: number
+  totalPatients: number
+  todayAppointments: number
 }
 
 export interface LineChartPoint {
@@ -103,14 +105,23 @@ export async function getDashboardKpis(period: Period): Promise<DashboardKpiData
   const activeDoctorIds = new Set(reservasAtivas.map((r: any) => r.medico_id))
 
   const nowStr = now.toISOString()
-  const [reservasAgora, proximosAgendamentos] = await Promise.all([
-    pb.collection('reservas').getFullList({
-      filter: `status = "ativa" && data_inicio <= "${nowStr}" && data_fim >= "${nowStr}"`,
-    }),
-    pb.collection('agendamentos').getList(1, 1, {
-      filter: `hora_inicio >= "${nowStr}" && hora_inicio <= "${new Date(now.getTime() + 7 * 24 * 3600 * 1000).toISOString()}"`,
-    }),
-  ])
+  const todayStart = startOfDay(now).toISOString()
+  const todayEnd = endOfDay(now).toISOString()
+
+  const [reservasAgora, proximosAgendamentos, pacientesCount, agendamentosHoje] = await Promise.all(
+    [
+      pb.collection('reservas').getFullList({
+        filter: `status = "ativa" && data_inicio <= "${nowStr}" && data_fim >= "${nowStr}"`,
+      }),
+      pb.collection('agendamentos').getList(1, 1, {
+        filter: `hora_inicio >= "${nowStr}" && hora_inicio <= "${new Date(now.getTime() + 7 * 24 * 3600 * 1000).toISOString()}"`,
+      }),
+      pb.collection('pacientes').getList(1, 1, {}),
+      pb.collection('agendamentos').getList(1, 1, {
+        filter: `hora_inicio >= "${todayStart}" && hora_inicio <= "${todayEnd}"`,
+      }),
+    ],
+  )
 
   const ocupadasAgora = new Set(reservasAgora.map((r: any) => r.sala_id))
   const availableRooms = todasSalas.filter((s: any) => !ocupadasAgora.has(s.id)).length
@@ -120,6 +131,8 @@ export async function getDashboardKpis(period: Period): Promise<DashboardKpiData
     activeDoctors: activeDoctorIds.size,
     availableRooms,
     upcomingAppointments: proximosAgendamentos.totalItems,
+    totalPatients: pacientesCount.totalItems,
+    todayAppointments: agendamentosHoje.totalItems,
   }
 }
 

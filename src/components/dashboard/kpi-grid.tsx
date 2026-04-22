@@ -7,38 +7,40 @@ import {
   CalendarDays,
   TrendingUp,
   AlertTriangle,
+  Users,
+  CalendarCheck,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export function KpiGrid({ data, loading }: { data: KpiData; loading?: boolean }) {
+export function KpiGrid({ data, loading }: { data: Partial<KpiData>; loading?: boolean }) {
   const items = [
     {
       title: 'Taxa Ocupação (%)',
-      value: `${data.occupancyRate.toFixed(1)}%`,
+      value: data?.occupancyRate ? `${data.occupancyRate.toFixed(1)}%` : '0%',
       icon: LineChart,
       trend: '4.2%',
       trendType: 'positive' as const,
     },
     {
       title: 'Médicos Ativos',
-      value: data.activeDoctors,
+      value: data?.activeDoctors || 0,
       icon: Stethoscope,
       trend: '',
       trendType: 'neutral' as const,
     },
     {
-      title: 'Salas Disponíveis',
-      value: data.availableRooms.toString().padStart(2, '0'),
-      icon: DoorOpen,
-      trend: data.availableRooms === 0 ? 'Baixa' : '',
-      trendType: 'warning' as const,
+      title: 'Total de Pacientes',
+      value: data?.totalPatients || 0,
+      icon: Users,
+      trend: '',
+      trendType: 'neutral' as const,
     },
     {
-      title: 'Agendamentos (Próx 7 dias)',
-      value: data.upcomingAppointments,
-      icon: CalendarDays,
-      trend: '12%',
-      trendType: 'positive' as const,
+      title: 'Agendamentos de Hoje',
+      value: data?.todayAppointments || 0,
+      icon: CalendarCheck,
+      trend: '',
+      trendType: 'neutral' as const,
     },
   ]
 

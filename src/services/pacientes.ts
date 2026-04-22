@@ -13,6 +13,7 @@ export interface Paciente {
   anamnese?: string
   medicacoes?: string
   notas_internas?: string
+  dados_customizados?: any
   created: string
   updated: string
   expand?: {

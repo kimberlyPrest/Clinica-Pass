@@ -14,7 +14,7 @@ import {
   TableBody,
   TableCell,
 } from '@/components/ui/table'
-import { Plus, Edit, Trash, Search, User, Phone, Mail, FileText } from 'lucide-react'
+import { Plus, Edit, Trash, Search, User, Phone, Mail, FileText, FileJson } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { PacienteModal } from './components/PacienteModal'
 import { useToast } from '@/hooks/use-toast'
@@ -176,6 +176,12 @@ export default function Pacientes() {
                           <FileText className="w-3.5 h-3.5" /> {p.cpf}
                         </div>
                       )}
+                      {p.dados_customizados &&
+                        Object.keys(p.dados_customizados as any).length > 0 && (
+                          <div className="flex items-center gap-2 text-[#05807f] font-medium mt-2">
+                            <FileJson className="w-3.5 h-3.5" /> Possui Dados Adicionais
+                          </div>
+                        )}
                     </div>
                   </CardContent>
                 </Card>
@@ -214,6 +220,12 @@ export default function Pacientes() {
                         {p.data_nascimento
                           ? format(new Date(p.data_nascimento + 'T00:00:00'), 'dd/MM/yyyy')
                           : '-'}
+                        {p.dados_customizados &&
+                          Object.keys(p.dados_customizados as any).length > 0 && (
+                            <div className="mt-1 text-xs bg-muted/50 inline-block px-2 py-0.5 rounded text-muted-foreground">
+                              + Dados Clínicos
+                            </div>
+                          )}
                       </TableCell>
                       {user?.tipo_acesso === 'clinica' && (
                         <TableCell className="text-sm text-muted-foreground">
