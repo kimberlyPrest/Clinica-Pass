@@ -187,7 +187,7 @@ export function PacienteModal({ open, onOpenChange, medicoId, paciente, onSaved 
             <TabsTrigger value="dados">Dados Pessoais</TabsTrigger>
             <TabsTrigger value="clinico">Prontuário & Histórico</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="dados" className="space-y-6 py-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {user?.tipo_acesso === 'clinica' && !isEdit && (
@@ -249,7 +249,11 @@ export function PacienteModal({ open, onOpenChange, medicoId, paciente, onSaved 
 
               <div className="space-y-2">
                 <Label>CPF</Label>
-                <Input value={formData.cpf} onChange={handleCpfChange} placeholder="000.000.000-00" />
+                <Input
+                  value={formData.cpf}
+                  onChange={handleCpfChange}
+                  placeholder="000.000.000-00"
+                />
               </div>
 
               <div className="space-y-2">
@@ -286,7 +290,9 @@ export function PacienteModal({ open, onOpenChange, medicoId, paciente, onSaved 
 
               {customFieldsConfig.length > 0 && (
                 <>
-                  <h4 className="font-semibold text-gray-700 mt-4 border-t pt-4">Campos Customizados</h4>
+                  <h4 className="font-semibold text-gray-700 mt-4 border-t pt-4">
+                    Campos Customizados
+                  </h4>
                   {customFieldsConfig.map((field) => (
                     <div key={field.id} className="space-y-2">
                       <Label>{field.nome_campo}</Label>

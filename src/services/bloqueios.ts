@@ -46,12 +46,12 @@ export function avaliarRecorrenciaComplexa(padrao: string, data: Date): boolean 
   }
 
   // "1º domingo de cada mês", "2a terça-feira de cada mes"
-  const nthDayMatch = p.match(/^(\d)[ºoa\.]?\s+(.+?)\s+de\s+cada\s+m[eê]s$/)
+  const nthDayMatch = p.match(/^(\d)[ºoa.]?\s+(.+?)\s+de\s+cada\s+m[eê]s$/)
   if (nthDayMatch) {
     const n = parseInt(nthDayMatch[1], 10)
     const diaStr = nthDayMatch[2]
     const targetDay = diasSemanaMap[diaStr]
-    
+
     if (targetDay !== undefined) {
       const isTargetDay = dateObjDay === targetDay
       const isNthWeek = dateObjDate >= (n - 1) * 7 + 1 && dateObjDate <= n * 7
@@ -63,7 +63,7 @@ export function avaliarRecorrenciaComplexa(padrao: string, data: Date): boolean 
   const lastDayMatch = p.match(/^(?:[úu]ltimo|[úu]ltima)\s+(.+?)\s+de\s+cada\s+m[eê]s$/)
   if (lastDayMatch) {
     const diaStr = lastDayMatch[1]
-    
+
     if (diaStr === 'dia') {
       const lastDayOfMonth = new Date(year, month + 1, 0).getDate()
       return dateObjDate === lastDayOfMonth
