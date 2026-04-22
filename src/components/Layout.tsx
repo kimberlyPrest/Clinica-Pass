@@ -38,8 +38,10 @@ export default function Layout() {
 
   const navItems = isMedico
     ? [
-        { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard-medico' },
-        { icon: CalendarDays, label: 'Minha Agenda', path: '/agenda' },
+        { icon: LayoutDashboard, label: 'Dashboard', path: '/medico/dashboard' },
+        { icon: CalendarDays, label: 'Meu Calendário', path: '/medico/calendario' },
+        { icon: DoorOpen, label: 'Minhas Reservas', path: '/medico/reservas' },
+        { icon: Users, label: 'Meus Pacientes', path: '/medico/pacientes' },
       ]
     : [
         { icon: LayoutDashboard, label: 'Dashboard', path: '/' },

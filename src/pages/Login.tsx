@@ -26,7 +26,7 @@ export default function Login() {
 
   useEffect(() => {
     if (user) {
-      navigate(user.tipo_acesso === 'medico' ? '/dashboard-medico' : '/', { replace: true })
+      navigate(user.tipo_acesso === 'medico' ? '/medico/dashboard' : '/', { replace: true })
     }
   }, [user, navigate])
 

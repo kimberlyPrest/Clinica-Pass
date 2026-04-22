@@ -6,12 +6,15 @@ import Index from './pages/Index'
 import NotFound from './pages/NotFound'
 import Layout from './components/Layout'
 import Login from './pages/Login'
-import DashboardMedico from './pages/DashboardMedico'
 import ProtectedRoute from './components/ProtectedRoute'
 import MedicosList from './pages/medicos/MedicosList'
 import MedicoDetails from './pages/medicos/MedicoDetails'
 import SalasList from './pages/salas/SalasList'
 import Agenda from './pages/agenda/Agenda'
+import Dashboard from './pages/medico/Dashboard'
+import Reservas from './pages/medico/Reservas'
+import Calendario from './pages/medico/Calendario'
+import Pacientes from './pages/medico/Pacientes'
 import { AuthProvider } from './hooks/use-auth'
 
 const App = () => (
@@ -26,7 +29,10 @@ const App = () => (
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
               <Route path="/" element={<Index />} />
-              <Route path="/dashboard-medico" element={<DashboardMedico />} />
+              <Route path="/medico/dashboard" element={<Dashboard />} />
+              <Route path="/medico/reservas" element={<Reservas />} />
+              <Route path="/medico/calendario" element={<Calendario />} />
+              <Route path="/medico/pacientes" element={<Pacientes />} />
               <Route path="/medicos" element={<MedicosList />} />
               <Route path="/medicos/:id" element={<MedicoDetails />} />
               <Route path="/gestao-salas" element={<SalasList />} />

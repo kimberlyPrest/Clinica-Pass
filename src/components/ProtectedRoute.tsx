@@ -17,7 +17,7 @@ export default function ProtectedRoute({ allowedRoles }: { allowedRoles?: string
   }
 
   if (allowedRoles && !allowedRoles.includes(user.tipo_acesso)) {
-    return <Navigate to={user.tipo_acesso === 'medico' ? '/dashboard-medico' : '/'} replace />
+    return <Navigate to={user.tipo_acesso === 'medico' ? '/medico/dashboard' : '/'} replace />
   }
 
   return <Outlet />

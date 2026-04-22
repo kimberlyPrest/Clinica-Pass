@@ -38,6 +38,32 @@ export const getAgendamentos = (start: Date, end: Date) => {
   })
 }
 
+export const getReservasMedicoPeriodo = (medicoId: string, start: Date, end: Date) => {
+  return pb.collection('reservas').getFullList<Reserva>({
+    filter: `medico_id = "${medicoId}" && data_inicio >= "${start.toISOString()}" && data_inicio <= "${end.toISOString()}" && status = 'ativa'`,
+    expand: 'sala_id',
+    sort: 'data_inicio',
+  })
+}
+
+export const getConsultasMedicoPeriodo = (medicoId: string, start: Date, end: Date) => {
+  return pb.collection('agendamentos').getFullList<Agendamento>({
+    filter: `reserva_id.medico_id = "${medicoId}" && hora_inicio >= "${start.toISOString()}" && hora_inicio <= "${end.toISOString()}"`,
+    expand: 'reserva_id,reserva_id.sala_id',
+    sort: 'hora_inicio',
+  })
+}
+
+export const getHistoricoMedico = (medicoId: string) => {
+  const now = new Date()
+  return pb.collection('agendamentos').getFullList<Agendamento>({
+    filter: `reserva_id.medico_id = "${medicoId}" && hora_inicio < "${now.toISOString()}"`,
+    expand: 'reserva_id,reserva_id.sala_id',
+    sort: '-hora_inicio',
+    limit: 10,
+  })
+}
+
 export const createReserva = (data: Partial<Reserva>) =>
   pb.collection('reservas').create<Reserva>(data)
 export const updateReserva = (id: string, data: Partial<Reserva>) =>
