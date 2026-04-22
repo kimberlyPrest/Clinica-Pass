@@ -67,7 +67,7 @@ export default function MedicosList() {
   }
 
   return (
-    <div className="p-4 md:p-8 bg-[#f7e6dc] min-h-[calc(100vh-4rem)]">
+    <div className="p-4 md:p-8 min-h-[calc(100vh-4rem)] bg-[#fcfcfc]">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <h1 className="text-3xl font-bold text-[#05807f]">Médicos</h1>
