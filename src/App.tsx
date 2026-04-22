@@ -20,40 +20,43 @@ import GestaoReservas from './pages/gestao-reservas/GestaoReservas'
 import Configuracoes from './pages/configuracoes/Configuracoes'
 import Perfil from './pages/perfil/Perfil'
 import { AuthProvider } from './hooks/use-auth'
+import { ThemeProvider } from './components/theme-provider'
 
 const App = () => (
-  <AuthProvider>
-    <BrowserRouter future={{ v7_startTransition: false, v7_relativeSplatPath: false }}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <ToastDemo />
-        <Routes>
-          <Route path="/login" element={<Login />} />
+  <ThemeProvider defaultTheme="light" attribute="class">
+    <AuthProvider>
+      <BrowserRouter future={{ v7_startTransition: false, v7_relativeSplatPath: false }}>
+        <TooltipProvider delayDuration={200}>
+          <Toaster />
+          <Sonner />
+          <ToastDemo />
+          <Routes>
+            <Route path="/login" element={<Login />} />
 
-          <Route element={<ProtectedRoute />}>
-            <Route element={<Layout />}>
-              <Route path="/" element={<Index />} />
-              <Route path="/medico/dashboard" element={<Dashboard />} />
-              <Route path="/medico/reservas" element={<Reservas />} />
-              <Route path="/medico/calendario" element={<Calendario />} />
-              <Route path="/medico/pacientes" element={<Pacientes />} />
-              <Route path="/medicos" element={<MedicosList />} />
-              <Route path="/medicos/:id" element={<MedicoDetails />} />
-              <Route path="/gestao-salas" element={<SalasList />} />
-              <Route path="/agenda" element={<Agenda />} />
-              <Route path="/gestao-reservas" element={<GestaoReservas />} />
-              <Route path="/configuracoes" element={<Configuracoes />} />
-              <Route path="/perfil" element={<Perfil />} />
-              <Route path="/perfil/editar" element={<Configuracoes />} />
+            <Route element={<ProtectedRoute />}>
+              <Route element={<Layout />}>
+                <Route path="/" element={<Index />} />
+                <Route path="/medico/dashboard" element={<Dashboard />} />
+                <Route path="/medico/reservas" element={<Reservas />} />
+                <Route path="/medico/calendario" element={<Calendario />} />
+                <Route path="/medico/pacientes" element={<Pacientes />} />
+                <Route path="/medicos" element={<MedicosList />} />
+                <Route path="/medicos/:id" element={<MedicoDetails />} />
+                <Route path="/gestao-salas" element={<SalasList />} />
+                <Route path="/agenda" element={<Agenda />} />
+                <Route path="/gestao-reservas" element={<GestaoReservas />} />
+                <Route path="/configuracoes" element={<Configuracoes />} />
+                <Route path="/perfil" element={<Perfil />} />
+                <Route path="/perfil/editar" element={<Configuracoes />} />
+              </Route>
             </Route>
-          </Route>
 
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </TooltipProvider>
-    </BrowserRouter>
-  </AuthProvider>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </TooltipProvider>
+      </BrowserRouter>
+    </AuthProvider>
+  </ThemeProvider>
 )
 
 export default App

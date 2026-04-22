@@ -1,4 +1,3 @@
-/* Tailwind config for the frontend react app. This is where the app theme should be defined: https://v2.tailwindcss.com/docs/configuration. */
 import type { Config } from 'tailwindcss'
 import animatePlugin from 'tailwindcss-animate'
 import typographyPlugin from '@tailwindcss/typography'
@@ -39,11 +38,31 @@ export default {
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
+          container: 'hsl(var(--primary-container))',
         },
+        'on-primary': 'hsl(var(--on-primary))',
         secondary: {
           DEFAULT: 'hsl(var(--secondary))',
           foreground: 'hsl(var(--secondary-foreground))',
+          container: 'hsl(var(--secondary-container))',
         },
+        'on-secondary': 'hsl(var(--on-secondary))',
+        surface: {
+          DEFAULT: 'hsl(var(--surface))',
+          container: 'hsl(var(--surface-container))',
+          'container-low': 'hsl(var(--surface-container-low))',
+          'container-lowest': 'hsl(var(--surface-container-lowest))',
+        },
+        'on-surface': 'hsl(var(--on-surface))',
+        'on-surface-variant': 'hsl(var(--on-surface-variant))',
+        outline: {
+          DEFAULT: 'hsl(var(--outline))',
+          variant: 'hsl(var(--outline-variant))',
+        },
+        success: 'hsl(var(--success))',
+        warning: 'hsl(var(--warning))',
+        error: 'hsl(var(--error))',
+        info: 'hsl(var(--info))',
         destructive: {
           DEFAULT: 'hsl(var(--destructive))',
           foreground: 'hsl(var(--destructive-foreground))',
@@ -87,13 +106,22 @@ export default {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
+      boxShadow: {
+        sm: '0 2px 4px rgba(5, 128, 127, 0.04)',
+        md: '0 4px 8px rgba(5, 128, 127, 0.08)',
+        lg: '0 8px 16px rgba(5, 128, 127, 0.12)',
+        xl: '0 12px 24px rgba(5, 128, 127, 0.16)',
+        subtle: '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03)',
+        elevation: '0 4px 20px rgba(0, 0, 0, 0.05)',
+      },
+      transitionDuration: {
+        fast: '100ms',
+        standard: '200ms',
+        slow: '300ms',
+      },
       transitionProperty: {
         width: 'width',
         height: 'height',
-      },
-      boxShadow: {
-        subtle: '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03)',
-        elevation: '0 4px 20px rgba(0, 0, 0, 0.05)',
       },
       transitionTimingFunction: {
         apple: 'cubic-bezier(0.42, 0, 0.58, 1)',
