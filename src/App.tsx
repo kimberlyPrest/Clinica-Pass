@@ -11,6 +11,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import MedicosList from './pages/medicos/MedicosList'
 import MedicoDetails from './pages/medicos/MedicoDetails'
 import SalasList from './pages/salas/SalasList'
+import Agenda from './pages/agenda/Agenda'
 import { AuthProvider } from './hooks/use-auth'
 
 const App = () => (
@@ -29,10 +30,7 @@ const App = () => (
               <Route path="/medicos" element={<MedicosList />} />
               <Route path="/medicos/:id" element={<MedicoDetails />} />
               <Route path="/gestao-salas" element={<SalasList />} />
-              <Route
-                path="/agenda"
-                element={<div className="p-8 text-muted-foreground">Agenda (Em breve)</div>}
-              />
+              <Route path="/agenda" element={<Agenda />} />
             </Route>
           </Route>
 
