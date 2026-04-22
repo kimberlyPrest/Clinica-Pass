@@ -8,6 +8,8 @@ import Layout from './components/Layout'
 import Login from './pages/Login'
 import DashboardMedico from './pages/DashboardMedico'
 import ProtectedRoute from './components/ProtectedRoute'
+import MedicosList from './pages/medicos/MedicosList'
+import MedicoDetails from './pages/medicos/MedicoDetails'
 import { AuthProvider } from './hooks/use-auth'
 
 const App = () => (
@@ -23,12 +25,8 @@ const App = () => (
             <Route element={<Layout />}>
               <Route path="/" element={<Index />} />
               <Route path="/dashboard-medico" element={<DashboardMedico />} />
-              <Route
-                path="/medicos"
-                element={
-                  <div className="p-8 text-muted-foreground">Lista de Médicos (Em breve)</div>
-                }
-              />
+              <Route path="/medicos" element={<MedicosList />} />
+              <Route path="/medicos/:id" element={<MedicoDetails />} />
               <Route
                 path="/salas"
                 element={
