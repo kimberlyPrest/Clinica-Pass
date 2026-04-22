@@ -2,14 +2,20 @@ import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Slider } from '@/components/ui/slider'
 import { DashboardFilters, Period } from './types'
-import { MOCK_ROOMS, MOCK_DOCTOR_TYPES } from './mock-data'
 
 interface FiltersProps {
   filters: DashboardFilters
   onChange: (filters: DashboardFilters) => void
+  roomOptions: string[]
+  doctorTypeOptions: string[]
 }
 
-export function DashboardFiltersPanel({ filters, onChange }: FiltersProps) {
+export function DashboardFiltersPanel({
+  filters,
+  onChange,
+  roomOptions,
+  doctorTypeOptions,
+}: FiltersProps) {
   const periods: Period[] = ['Dia', 'Semana', 'Mês']
 
   return (
@@ -36,7 +42,7 @@ export function DashboardFiltersPanel({ filters, onChange }: FiltersProps) {
             Médicos (Categorias)
           </h2>
           <div className="flex flex-wrap gap-4">
-            {MOCK_DOCTOR_TYPES.map((type) => (
+            {doctorTypeOptions.map((type) => (
               <div key={type} className="flex items-center space-x-2">
                 <Checkbox
                   id={`doc-${type}`}
@@ -66,7 +72,7 @@ export function DashboardFiltersPanel({ filters, onChange }: FiltersProps) {
             Salas Disponíveis
           </h2>
           <div className="flex flex-wrap gap-4">
-            {MOCK_ROOMS.map((room) => (
+            {roomOptions.map((room) => (
               <div key={room} className="flex items-center space-x-2">
                 <Checkbox
                   id={room}

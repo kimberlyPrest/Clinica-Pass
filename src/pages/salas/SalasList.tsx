@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
-import { getSalas, Sala } from '@/services/salas'
-import { getBloqueios, Bloqueio } from '@/services/bloqueios'
+import { startOfMonth, endOfMonth, differenceInMinutes, parseISO, format } from 'date-fns'
+import { getSalas, getTodasReservasdoMes, getProximaReservaDaSala, type Sala } from '@/services/salas'
+import { getBloqueios, type Bloqueio } from '@/services/bloqueios'
 import { useRealtime } from '@/hooks/use-realtime'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -18,9 +19,51 @@ import { SalaFormModal } from './components/SalaFormModal'
 import { BloqueioFormModal } from './components/BloqueioFormModal'
 import { AgendaSala } from './components/AgendaSala'
 
+interface SalaStats {
+  ocupacao: number
+  proximoUso: string
+}
+
+function timeToMinutes(time: string): number {
+  const [h, m] = time.split(':').map(Number)
+  return h * 60 + (m || 0)
+}
+
+function calcularOcupacao(salaId: string, sala: Sala, reservas: any[]): number {
+  const reservasDaSala = reservas.filter((r: any) => r.sala_id === salaId)
+  if (reservasDaSala.length === 0) return 0
+
+  const totalReservedMinutes = reservasDaSala.reduce((acc: number, r: any) => {
+    return acc + differenceInMinutes(parseISO(r.data_fim), parseISO(r.data_inicio))
+  }, 0)
+
+  const workMinutesPerDay = Math.max(
+    0,
+    timeToMinutes(sala.horario_fim || '19:00') - timeToMinutes(sala.horario_inicio || '09:00'),
+  )
+  const diasNoMes = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()
+  const totalAvailable = workMinutesPerDay * diasNoMes
+
+  return totalAvailable > 0
+    ? Math.min(100, Math.round((totalReservedMinutes / totalAvailable) * 100))
+    : 0
+}
+
+function formatProximoUso(reserva: any): string {
+  if (!reserva) return 'Sem reservas'
+  const inicio = parseISO(reserva.data_inicio)
+  const hoje = new Date()
+  const isHoje =
+    inicio.getFullYear() === hoje.getFullYear() &&
+    inicio.getMonth() === hoje.getMonth() &&
+    inicio.getDate() === hoje.getDate()
+  return isHoje ? format(inicio, 'HH:mm') : format(inicio, 'dd/MM')
+}
+
 export default function SalasList() {
   const [salas, setSalas] = useState<Sala[]>([])
   const [bloqueios, setBloqueios] = useState<Bloqueio[]>([])
+  const [statsMap, setStatsMap] = useState<Map<string, SalaStats>>(new Map())
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState<string>('todas')
   const [ocupacaoMin, setOcupacaoMin] = useState([0])
@@ -33,9 +76,29 @@ export default function SalasList() {
 
   const loadData = async () => {
     try {
-      const [s, b] = await Promise.all([getSalas(), getBloqueios()])
+      const now = new Date()
+      const monthStart = startOfMonth(now)
+      const monthEnd = endOfMonth(now)
+
+      const [s, b, todasReservas] = await Promise.all([
+        getSalas(),
+        getBloqueios(),
+        getTodasReservasdoMes(monthStart, monthEnd),
+      ])
+
       setSalas(s)
       setBloqueios(b)
+
+      const proximasReservas = await Promise.all(s.map((sala) => getProximaReservaDaSala(sala.id)))
+
+      const newMap = new Map<string, SalaStats>()
+      s.forEach((sala, i) => {
+        newMap.set(sala.id, {
+          ocupacao: calcularOcupacao(sala.id, sala, todasReservas),
+          proximoUso: formatProximoUso(proximasReservas[i]),
+        })
+      })
+      setStatsMap(newMap)
     } catch (e) {
       console.error('Failed to load data', e)
     }
@@ -47,22 +110,17 @@ export default function SalasList() {
 
   useRealtime('salas', () => loadData())
   useRealtime('bloqueios', () => loadData())
-
-  const mockOcupacao = (nome: string) => {
-    if (nome === 'Consultório A') return 65
-    if (nome === 'Consultório B') return 78
-    if (nome === 'Consultório C') return 52
-    return 30
-  }
+  useRealtime('reservas', () => loadData())
 
   const filteredSalas = useMemo(() => {
     return salas.filter((s) => {
       const matchSearch = s.nome.toLowerCase().includes(search.toLowerCase())
       const matchStatus = status === 'todas' || s.status === status
-      const matchOcupacao = mockOcupacao(s.nome) >= ocupacaoMin[0]
+      const ocupacao = statsMap.get(s.id)?.ocupacao ?? 0
+      const matchOcupacao = ocupacao >= ocupacaoMin[0]
       return matchSearch && matchStatus && matchOcupacao
     })
-  }, [salas, search, status, ocupacaoMin])
+  }, [salas, search, status, ocupacaoMin, statsMap])
 
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
@@ -123,7 +181,8 @@ export default function SalasList() {
           <SalaCard
             key={sala.id}
             sala={sala}
-            ocupacao={mockOcupacao(sala.nome)}
+            ocupacao={statsMap.get(sala.id)?.ocupacao ?? 0}
+            proximoUso={statsMap.get(sala.id)?.proximoUso ?? '...'}
             onEdit={() => setModalSala({ open: true, sala })}
             onBlock={() => setModalBloqueio({ open: true, salaId: sala.id })}
             onOpenAgenda={() => setAgendaSala({ open: true, sala })}

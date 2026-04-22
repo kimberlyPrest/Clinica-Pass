@@ -1,4 +1,4 @@
-import { parseISO, isBefore, isAfter, format, isSameDay } from 'date-fns'
+import { parseISO, isBefore, isAfter, format, isSameDay, differenceInMinutes } from 'date-fns'
 
 export function checkConflict(start: Date, end: Date, reservas: any[], salaId: string) {
   const conflicting = reservas.find((r) => {
@@ -47,4 +47,31 @@ export function checkBlock(start: Date, end: Date, bloqueios: any[], salaId: str
     return { error: 'blocked', block: blocked }
   }
   return null
+}
+
+export function checkConsultasDuration(
+  agendamentosExistentes: any[],
+  novaConsulta: { inicio: Date; fim: Date },
+  reserva: { data_inicio: string; data_fim: string },
+  excludeId?: string,
+): { excede: boolean; minutosExcedidos: number; minutosDisponiveis: number } {
+  const resStart = parseISO(reserva.data_inicio)
+  const resEnd = parseISO(reserva.data_fim)
+  const totalResMinutes = differenceInMinutes(resEnd, resStart)
+
+  const minutosJaUsados = agendamentosExistentes
+    .filter((a) => a.id !== excludeId)
+    .reduce((acc, a) => {
+      return acc + differenceInMinutes(parseISO(a.hora_fim), parseISO(a.hora_inicio))
+    }, 0)
+
+  const novaConsultaMinutos = differenceInMinutes(novaConsulta.fim, novaConsulta.inicio)
+  const totalUsado = minutosJaUsados + novaConsultaMinutos
+  const minutosExcedidos = Math.max(0, totalUsado - totalResMinutes)
+
+  return {
+    excede: totalUsado > totalResMinutes,
+    minutosExcedidos,
+    minutosDisponiveis: Math.max(0, totalResMinutes - minutosJaUsados),
+  }
 }

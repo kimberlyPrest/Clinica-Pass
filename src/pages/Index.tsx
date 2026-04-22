@@ -1,47 +1,130 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 import { DashboardFiltersPanel } from '@/components/dashboard/filters'
 import { KpiGrid } from '@/components/dashboard/kpi-grid'
 import { ChartsSection } from '@/components/dashboard/charts-section'
 import { AppointmentsTable } from '@/components/dashboard/appointments-table'
-import { DashboardFilters } from '@/components/dashboard/types'
+import type { DashboardFilters, KpiData, Appointment } from '@/components/dashboard/types'
 import {
-  generateDashboardData,
-  MOCK_ROOMS,
-  MOCK_DOCTOR_TYPES,
-} from '@/components/dashboard/mock-data'
+  getDashboardKpis,
+  getDashboardLineChart,
+  getDashboardPieChart,
+  getDashboardAppointments,
+  type LineChartPoint,
+  type PieChartPoint,
+} from '@/services/dashboard'
+import { getSalas } from '@/services/salas'
 import { Bell, SlidersHorizontal } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { SidebarTrigger } from '@/components/ui/sidebar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
+const DOCTOR_TYPE_OPTIONS = ['Mensalista', 'Avulso']
+
 export default function Index() {
+  const [roomOptions, setRoomOptions] = useState<string[]>([])
   const [filters, setFilters] = useState<DashboardFilters>({
-    period: 'Dia',
-    rooms: [...MOCK_ROOMS],
-    doctorTypes: [...MOCK_DOCTOR_TYPES],
+    period: 'Mês',
+    rooms: [],
+    doctorTypes: [...DOCTOR_TYPE_OPTIONS],
     occupancy: [0, 100],
   })
 
+  const [kpiData, setKpiData] = useState<KpiData>({
+    occupancyRate: 0,
+    activeDoctors: 0,
+    availableRooms: 0,
+    upcomingAppointments: 0,
+  })
+  const [lineChartData, setLineChartData] = useState<LineChartPoint[]>([])
+  const [pieChartData, setPieChartData] = useState<PieChartPoint[]>([])
+  const [appointments, setAppointments] = useState<Appointment[]>([])
   const [tableStatus, setTableStatus] = useState<'loading' | 'success' | 'empty' | 'error'>(
     'loading',
   )
+  const [kpiLoading, setKpiLoading] = useState(true)
+  const [chartsLoading, setChartsLoading] = useState(true)
 
-  const dashboardData = useMemo(() => generateDashboardData(filters), [filters])
+  const loadRooms = useCallback(async () => {
+    try {
+      const salas = await getSalas()
+      const names = salas.map((s) => s.nome)
+      setRoomOptions(names)
+      setFilters((prev) => ({ ...prev, rooms: names }))
+    } catch {
+      // silently fail
+    }
+  }, [])
+
+  const loadKpis = useCallback(async () => {
+    setKpiLoading(true)
+    try {
+      const data = await getDashboardKpis(filters.period)
+      setKpiData(data)
+    } catch {
+      // silently fail
+    } finally {
+      setKpiLoading(false)
+    }
+  }, [filters.period])
+
+  const loadCharts = useCallback(async () => {
+    setChartsLoading(true)
+    try {
+      const [line, pie] = await Promise.all([getDashboardLineChart(), getDashboardPieChart()])
+      setLineChartData(line)
+      const filteredPie =
+        filters.rooms.length > 0
+          ? pie.filter((p) => filters.rooms.includes(p.name))
+          : pie
+      setPieChartData(filteredPie)
+    } catch {
+      // silently fail
+    } finally {
+      setChartsLoading(false)
+    }
+  }, [filters.rooms])
+
+  const loadAppointments = useCallback(async () => {
+    setTableStatus('loading')
+    try {
+      const data = await getDashboardAppointments()
+      const filtered = data.filter((a) => {
+        const roomOk = filters.rooms.length === 0 || filters.rooms.includes(a.room)
+        return roomOk
+      })
+      setAppointments(filtered)
+      setTableStatus(filtered.length === 0 ? 'empty' : 'success')
+    } catch {
+      setTableStatus('error')
+    }
+  }, [filters.rooms])
 
   useEffect(() => {
-    setTableStatus('loading')
-    const timer = setTimeout(() => {
-      if (Math.random() < 0.05) {
-        setTableStatus('error')
-      } else if (dashboardData.appointments.length === 0) {
-        setTableStatus('empty')
-      } else {
-        setTableStatus('success')
-      }
-    }, 600)
-    return () => clearTimeout(timer)
-  }, [filters, dashboardData.appointments.length])
+    loadRooms()
+  }, [loadRooms])
+
+  useEffect(() => {
+    loadKpis()
+  }, [loadKpis])
+
+  useEffect(() => {
+    loadCharts()
+  }, [loadCharts])
+
+  useEffect(() => {
+    loadAppointments()
+  }, [loadAppointments])
+
+  const handleRetry = () => {
+    loadKpis()
+    loadCharts()
+    loadAppointments()
+  }
+
+  const today = format(new Date(), "d 'de' MMMM", { locale: ptBR })
 
   return (
     <div className="min-h-full bg-background text-foreground p-4 md:p-8 font-sans transition-colors duration-500">
@@ -54,7 +137,7 @@ export default function Index() {
                 Visão Geral
               </h1>
               <p className="text-muted-foreground mt-1">
-                Acompanhamento de performance da clínica hoje, 24 de Outubro.
+                Acompanhamento de performance da clínica hoje, {today}.
               </p>
             </div>
           </div>
@@ -74,7 +157,12 @@ export default function Index() {
                 className="w-[340px] md:w-[600px] p-0 border-border/50 shadow-lg rounded-xl"
                 align="end"
               >
-                <DashboardFiltersPanel filters={filters} onChange={setFilters} />
+                <DashboardFiltersPanel
+                  filters={filters}
+                  onChange={setFilters}
+                  roomOptions={roomOptions}
+                  doctorTypeOptions={DOCTOR_TYPE_OPTIONS}
+                />
               </PopoverContent>
             </Popover>
             <Button
@@ -92,11 +180,12 @@ export default function Index() {
         </header>
 
         <section className="space-y-8">
-          <KpiGrid data={dashboardData.kpiData} />
+          <KpiGrid data={kpiData} loading={kpiLoading} />
 
           <ChartsSection
-            lineData={dashboardData.lineChartData}
-            pieData={dashboardData.pieChartData}
+            lineData={lineChartData}
+            pieData={pieChartData}
+            loading={chartsLoading}
           />
 
           <div
@@ -115,14 +204,15 @@ export default function Index() {
               <Button
                 variant="secondary"
                 className="bg-secondary/40 hover:bg-secondary/60 text-primary font-bold"
+                onClick={handleRetry}
               >
-                VER TODOS
+                ATUALIZAR
               </Button>
             </div>
             <AppointmentsTable
-              data={dashboardData.appointments}
+              data={appointments}
               status={tableStatus}
-              onRetry={() => setFilters({ ...filters })}
+              onRetry={handleRetry}
             />
           </div>
         </section>

@@ -1,24 +1,50 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Settings } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Users, Shield } from 'lucide-react'
+import { UsuariosTable } from '@/components/configuracoes/UsuariosTable'
+import { PermissoesTable } from '@/components/configuracoes/PermissoesTable'
 
 export default function Configuracoes() {
   return (
     <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-6 animate-fade-in-up">
       <div>
         <h1 className="text-3xl font-display font-bold tracking-tight">Configurações</h1>
-        <p className="text-muted-foreground mt-1">Ajuste as preferências do sistema e perfil.</p>
+        <p className="text-muted-foreground mt-1">Gerencie usuários e permissões do sistema.</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Configurações do Sistema</CardTitle>
-          <CardDescription>Módulo em desenvolvimento.</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
-          <Settings className="w-12 h-12 mb-4 opacity-20" />
-          <p>Esta funcionalidade estará disponível em breve.</p>
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="usuarios">
+        <TabsList className="mb-4">
+          <TabsTrigger value="usuarios" className="flex items-center gap-2">
+            <Users className="w-4 h-4" /> Usuários
+          </TabsTrigger>
+          <TabsTrigger value="permissoes" className="flex items-center gap-2">
+            <Shield className="w-4 h-4" /> Permissões
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="usuarios">
+          <div className="space-y-3">
+            <div>
+              <h2 className="text-lg font-semibold">Usuários do Sistema</h2>
+              <p className="text-sm text-muted-foreground">
+                Todos os usuários cadastrados, seus papéis e vínculos no sistema.
+              </p>
+            </div>
+            <UsuariosTable />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="permissoes">
+          <div className="space-y-3">
+            <div>
+              <h2 className="text-lg font-semibold">Permissões por Papel</h2>
+              <p className="text-sm text-muted-foreground">
+                Defina quais recursos cada papel de usuário pode acessar. As alterações são salvas automaticamente.
+              </p>
+            </div>
+            <PermissoesTable />
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
