@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import {
@@ -12,10 +11,9 @@ import {
   Cell,
   ResponsiveContainer,
 } from 'recharts'
-import { MoreVertical } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { MoreVertical, ChevronDown } from 'lucide-react'
 
-const pieColors = ['#05807f', '#77d4d3', '#f0dfd5']
+const PIE_COLORS = ['#05807f', '#77d6d4', '#f0dfd5']
 
 export function ChartsSection({
   lineData,
@@ -28,7 +26,7 @@ export function ChartsSection({
 }) {
   const pieConfig = pieData.reduce(
     (acc, entry, i) => {
-      acc[entry.name] = { label: entry.name, color: pieColors[i % pieColors.length] }
+      acc[entry.name] = { label: entry.name, color: PIE_COLORS[i % PIE_COLORS.length] }
       return acc
     },
     {} as Record<string, { label: string; color: string }>,
@@ -36,61 +34,69 @@ export function ChartsSection({
 
   const total = pieData.reduce((acc, curr) => acc + curr.value, 0)
 
+  const cardBase =
+    'bg-white rounded-xl border border-[#e6e8ea] shadow-[0_2px_4px_rgba(5,128,127,0.04)]'
+
   if (loading) {
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2 shadow-sm border-border/50 rounded-2xl">
-          <CardContent className="p-6">
-            <Skeleton className="h-6 w-40 mb-4" />
-            <Skeleton className="h-[300px] w-full rounded-xl" />
-          </CardContent>
-        </Card>
-        <Card className="shadow-sm border-border/50 rounded-2xl">
-          <CardContent className="p-6">
-            <Skeleton className="h-6 w-40 mb-4" />
-            <Skeleton className="h-48 w-48 rounded-full mx-auto mb-4" />
-            <div className="space-y-3">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4" />
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div className={`lg:col-span-3 ${cardBase} p-6`}>
+          <Skeleton className="h-5 w-40 mb-4" />
+          <Skeleton className="h-[280px] w-full rounded-xl" />
+        </div>
+        <div className={`lg:col-span-2 ${cardBase} p-6`}>
+          <Skeleton className="h-5 w-40 mb-4" />
+          <Skeleton className="h-40 w-40 rounded-full mx-auto mb-6" />
+          <div className="space-y-3">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <Card
-        className="lg:col-span-2 animate-fade-in-up shadow-sm border-border/50 rounded-2xl"
+    <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      {/* Line Chart — 3/5 */}
+      <div
+        className={`lg:col-span-3 ${cardBase} flex flex-col animate-fade-in-up`}
         style={{ animationDelay: '400ms' }}
       >
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-xl font-display font-bold text-foreground">
-            Ocupação Mensal
-          </CardTitle>
-          <div className="flex items-center text-sm font-bold text-accent bg-accent/10 px-4 py-1.5 rounded-full cursor-pointer hover:bg-accent/20 transition-colors">
-            Este Mês <span className="ml-1 text-xs">▼</span>
-          </div>
-        </CardHeader>
-        <CardContent className="pb-4">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-[#f0dfd5]">
+          <h3 className="text-lg font-bold text-[#191c1e] font-display">Ocupação Mensal</h3>
+          <button className="flex items-center gap-1 text-sm font-semibold text-[#05807f] hover:text-[#006564] transition-colors">
+            Este Mês
+            <ChevronDown className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Chart */}
+        <div className="flex-1 px-2 py-4 min-h-[260px]">
           <ChartContainer
-            config={{ occupancy: { label: 'Ocupação', color: 'hsl(var(--accent))' } }}
-            className="h-[300px] w-full"
+            config={{ occupancy: { label: 'Ocupação', color: '#05807f' } }}
+            className="h-[260px] w-full"
           >
-            <LineChart data={lineData} margin={{ top: 20, right: 20, bottom: 0, left: -20 }}>
+            <LineChart data={lineData} margin={{ top: 16, right: 16, bottom: 0, left: -20 }}>
+              <defs>
+                <linearGradient id="lineAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#f7e6dc" stopOpacity={0.8} />
+                  <stop offset="100%" stopColor="#f7e6dc" stopOpacity={0.05} />
+                </linearGradient>
+              </defs>
               <CartesianGrid
                 strokeDasharray="3 3"
                 vertical={false}
-                stroke="hsl(var(--border))"
-                opacity={0.5}
+                stroke="#e6e8ea"
+                opacity={0.8}
               />
               <XAxis
                 dataKey="day"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                tick={{ fontSize: 12, fill: '#6e7979' }}
                 dy={10}
               />
               <YAxis axisLine={false} tickLine={false} tick={false} />
@@ -98,30 +104,34 @@ export function ChartsSection({
               <Line
                 type="natural"
                 dataKey="occupancy"
-                stroke="var(--color-occupancy)"
-                strokeWidth={6}
-                dot={{ r: 6, strokeWidth: 3, fill: 'white', stroke: 'var(--color-occupancy)' }}
-                activeDot={{ r: 8, strokeWidth: 0, fill: 'var(--color-occupancy)' }}
+                stroke="#05807f"
+                strokeWidth={4}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                dot={{ r: 5, strokeWidth: 2, fill: 'white', stroke: '#05807f' }}
+                activeDot={{ r: 7, strokeWidth: 0, fill: '#05807f' }}
               />
             </LineChart>
           </ChartContainer>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Card
-        className="animate-fade-in-up shadow-sm border-border/50 rounded-2xl"
+      {/* Pie Chart — 2/5 */}
+      <div
+        className={`lg:col-span-2 ${cardBase} flex flex-col animate-fade-in-up`}
         style={{ animationDelay: '500ms' }}
       >
-        <CardHeader className="flex flex-row items-center justify-between pb-0">
-          <CardTitle className="text-xl font-display font-bold text-foreground">
-            Distribuição por Sala
-          </CardTitle>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
-            <MoreVertical className="h-5 w-5" />
-          </Button>
-        </CardHeader>
-        <CardContent className="flex flex-col items-center justify-center h-[320px]">
-          <div className="relative w-48 h-48 mb-6">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-[#f0dfd5]">
+          <h3 className="text-lg font-bold text-[#191c1e] font-display">Distribuição por Sala</h3>
+          <button className="text-[#6e7979] hover:text-[#3e4948] transition-colors p-1 rounded-md hover:bg-[#eceef0]">
+            <MoreVertical className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="flex-1 flex flex-col items-center justify-center px-6 py-6 gap-6">
+          {/* Donut */}
+          <div className="relative w-40 h-40">
             <ChartContainer config={pieConfig} className="w-full h-full">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -129,42 +139,50 @@ export function ChartsSection({
                     data={pieData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
+                    innerRadius={52}
+                    outerRadius={72}
                     paddingAngle={0}
                     dataKey="value"
                     nameKey="name"
                     stroke="none"
                   >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />
+                    {pieData.map((_, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={PIE_COLORS[index % PIE_COLORS.length]}
+                      />
                     ))}
                   </Pie>
                   <ChartTooltip content={<ChartTooltipContent />} />
                 </PieChart>
               </ResponsiveContainer>
             </ChartContainer>
+            {/* Center total */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <span className="text-3xl font-display font-bold text-accent">{total}</span>
+              <span className="text-3xl font-bold text-[#05807f] font-display">{total}</span>
             </div>
           </div>
 
-          <div className="w-full space-y-3 px-4">
+          {/* Legend */}
+          <div className="w-full space-y-3">
             {pieData.map((entry, i) => (
-              <div key={entry.name} className="flex items-center justify-between text-sm">
+              <div
+                key={entry.name}
+                className="flex items-center justify-between text-sm"
+              >
                 <div className="flex items-center gap-2">
                   <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: pieColors[i % pieColors.length] }}
+                    className="w-3 h-3 rounded-full shrink-0"
+                    style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }}
                   />
-                  <span className="font-medium text-foreground">{entry.name}</span>
+                  <span className="text-[#191c1e] font-medium">{entry.name}</span>
                 </div>
-                <span className="font-bold text-foreground">{entry.percent}%</span>
+                <span className="font-bold text-[#191c1e]">{entry.percent}%</span>
               </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }

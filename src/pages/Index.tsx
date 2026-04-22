@@ -125,16 +125,16 @@ export default function Index() {
   const today = format(new Date(), "d 'de' MMMM", { locale: ptBR })
 
   return (
-    <div className="min-h-full bg-background text-foreground p-4 md:p-8 font-sans transition-colors duration-500">
+    <div className="min-h-full bg-[#f7f9fb] text-[#191c1e] p-4 md:p-8 font-sans">
       <div className="max-w-6xl mx-auto space-y-8">
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 animate-fade-in-down">
           <div className="flex items-start gap-4">
             <SidebarTrigger className="md:hidden mt-1" />
-            <div>
-              <h1 className="text-3xl font-display font-bold tracking-tight text-foreground">
+          <div>
+              <h1 className="text-[32px] font-bold font-display leading-tight text-[#191c1e]">
                 Visão Geral
               </h1>
-              <p className="text-muted-foreground mt-1">
+              <p className="text-sm text-[#6e7979] mt-1">
                 Acompanhamento de performance da clínica hoje, {today}.
               </p>
             </div>
@@ -182,25 +182,25 @@ export default function Index() {
 
           <ChartsSection lineData={lineChartData} pieData={pieChartData} loading={chartsLoading} />
 
+          {/* Appointments table section */}
           <div
-            className="space-y-4 animate-fade-in-up bg-card p-6 rounded-2xl shadow-sm border border-border/50"
+            className="animate-fade-in-up bg-white rounded-xl border border-[#e6e8ea] shadow-[0_2px_4px_rgba(5,128,127,0.04)] overflow-hidden"
             style={{ animationDelay: '600ms' }}
           >
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-[#e6e8ea] bg-[#f7f9fb]">
               <div>
-                <h2 className="text-xl font-display font-bold text-foreground">
+                <h2 className="text-xl font-bold font-display text-[#191c1e]">
                   Próximos Agendamentos
                 </h2>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-sm text-[#6e7979] mt-0.5">
                   Visão das últimas 24h e próximas 48h
                 </p>
               </div>
               <Button
-                variant="secondary"
-                className="bg-secondary/40 hover:bg-secondary/60 text-primary font-bold"
+                className="bg-[#f0dfd5] hover:bg-[#d3c3ba] text-[#05807f] border border-[#05807f]/20 text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-colors"
                 onClick={handleRetry}
               >
-                ATUALIZAR
+                Ver Todos
               </Button>
             </div>
             <AppointmentsTable data={appointments} status={tableStatus} onRetry={handleRetry} />
