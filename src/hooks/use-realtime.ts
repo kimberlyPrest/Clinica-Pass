@@ -28,7 +28,9 @@ export function useRealtime(
       })
       .then((fn) => {
         if (cancelled) {
-          fn().catch(() => {})
+          fn().catch(() => {
+            // Ignore unsubscription errors on cleanup
+          })
         } else {
           unsubscribeFn = fn
         }
@@ -37,7 +39,9 @@ export function useRealtime(
     return () => {
       cancelled = true
       if (unsubscribeFn) {
-        unsubscribeFn().catch(() => {})
+        unsubscribeFn().catch(() => {
+          // Ignore unsubscription errors on cleanup
+        })
       }
     }
   }, [collectionName, enabled])
