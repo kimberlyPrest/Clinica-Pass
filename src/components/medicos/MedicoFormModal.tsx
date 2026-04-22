@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { ChevronDown } from 'lucide-react'
 import { createMedico, updateMedico, type Medico } from '@/services/medicos'
 import { useToast } from '@/hooks/use-toast'
 import { extractFieldErrors } from '@/lib/pocketbase/errors'
@@ -32,12 +34,14 @@ export function MedicoFormModal({ open, onOpenChange, medico, onSuccess }: Medic
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
   const [telefone, setTelefone] = useState('')
   const [especialidade, setEspecialidade] = useState('')
   const [isMensalista, setIsMensalista] = useState(false)
   const [horarios, setHorarios] = useState<Record<string, string[]>>({})
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [accessOpen, setAccessOpen] = useState(false)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -45,14 +49,17 @@ export function MedicoFormModal({ open, onOpenChange, medico, onSuccess }: Medic
       if (medico) {
         setNome(medico.nome || '')
         setEmail(medico.email || '')
+        setNewPassword('')
         setTelefone(medico.telefone || '')
         setEspecialidade(medico.especialidade || '')
         setIsMensalista(medico.tipo === 'mensalista')
         setHorarios(medico.horarios_fixos || {})
+        setAccessOpen(false)
       } else {
         setNome('')
         setEmail('')
         setPassword('')
+        setNewPassword('')
         setTelefone('')
         setEspecialidade('')
         setIsMensalista(false)
@@ -77,20 +84,32 @@ export function MedicoFormModal({ open, onOpenChange, medico, onSuccess }: Medic
     setLoading(true)
     setErrors({})
     try {
-      const data = {
-        nome,
-        email,
-        telefone,
-        especialidade,
-        tipo: isMensalista ? 'mensalista' : 'avulso',
-        horarios_fixos: isMensalista ? horarios : {},
-        password: password || undefined,
-      }
-
       if (medico) {
+        const data: any = {
+          nome,
+          email,
+          telefone,
+          especialidade,
+          tipo: isMensalista ? 'mensalista' : 'avulso',
+          horarios_fixos: isMensalista ? horarios : {},
+        }
+        if (newPassword) {
+          data.password = newPassword
+          data.passwordConfirm = newPassword
+        }
         await updateMedico(medico.id, data)
         toast({ title: 'Médico atualizado com sucesso' })
       } else {
+        const data = {
+          nome,
+          email,
+          telefone,
+          especialidade,
+          tipo: isMensalista ? 'mensalista' : 'avulso',
+          horarios_fixos: isMensalista ? horarios : {},
+          password,
+          passwordConfirm: password,
+        }
         await createMedico(data)
         toast({ title: 'Médico salvo com sucesso' })
       }
@@ -128,7 +147,6 @@ export function MedicoFormModal({ open, onOpenChange, medico, onSuccess }: Medic
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled={!!medico}
               />
               {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
             </div>
@@ -162,6 +180,35 @@ export function MedicoFormModal({ open, onOpenChange, medico, onSuccess }: Medic
               )}
             </div>
           </div>
+
+          {medico && (
+            <Collapsible open={accessOpen} onOpenChange={setAccessOpen}>
+              <CollapsibleTrigger className="flex items-center justify-between w-full border rounded-lg p-4 bg-muted/10 hover:bg-muted/20 transition-colors">
+                <span className="text-sm font-medium">Alterar Acesso ao Sistema</span>
+                <ChevronDown
+                  className={`h-4 w-4 text-muted-foreground transition-transform ${accessOpen ? 'rotate-180' : ''}`}
+                />
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-2">
+                <div className="border rounded-lg p-4 space-y-4 bg-muted/5">
+                  <p className="text-xs text-muted-foreground">
+                    Deixe a nova senha em branco para manter a senha atual.
+                  </p>
+                  <div className="space-y-2">
+                    <Label>Nova Senha</Label>
+                    <Input
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Nova senha (opcional)"
+                      minLength={8}
+                    />
+                    {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
+                  </div>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          )}
 
           <div className="flex items-center space-x-2 border rounded-lg p-4 bg-muted/20">
             <Switch checked={isMensalista} onCheckedChange={setIsMensalista} />

@@ -1,4 +1,4 @@
-import { differenceInMinutes, startOfDay, parseISO } from 'date-fns'
+import { differenceInMinutes, startOfDay, parseISO, format } from 'date-fns'
 import type { Reserva, Agendamento } from '@/services/agenda'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
@@ -7,9 +7,16 @@ interface DayViewProps {
   reservas: Reserva[]
   agendamentos: Agendamento[]
   onSelectReserva: (r: Reserva) => void
+  onSlotClick?: (date: Date, hour: number) => void
 }
 
-export default function DayView({ date, reservas, agendamentos, onSelectReserva }: DayViewProps) {
+export default function DayView({
+  date,
+  reservas,
+  agendamentos,
+  onSelectReserva,
+  onSlotClick,
+}: DayViewProps) {
   const hours = Array.from({ length: 11 }, (_, i) => i + 9) // 9 to 19
 
   return (
@@ -23,7 +30,17 @@ export default function DayView({ date, reservas, agendamentos, onSelectReserva 
       </div>
       <div className="flex-1 relative min-w-[500px]">
         {hours.map((h) => (
-          <div key={h} className="h-20 border-b border-border/50 w-full" />
+          <div
+            key={h}
+            className={`h-20 border-b border-border/50 w-full ${onSlotClick ? 'cursor-pointer hover:bg-primary/5 transition-colors group' : ''}`}
+            onClick={() => onSlotClick?.(date, h)}
+          >
+            {onSlotClick && (
+              <span className="hidden group-hover:block text-xs text-muted-foreground pl-2 pt-1 pointer-events-none select-none">
+                + Reservar {h.toString().padStart(2, '0')}:00
+              </span>
+            )}
+          </div>
         ))}
         {reservas.map((r) => {
           const start = parseISO(r.data_inicio)
@@ -53,7 +70,10 @@ export default function DayView({ date, reservas, agendamentos, onSelectReserva 
                 <div
                   className="absolute bg-[#05807f] text-white rounded-md p-2 text-sm overflow-hidden cursor-pointer hover:ring-2 hover:ring-[#05807f]/50 transition-all shadow-sm z-20 animate-fade-in-up"
                   style={{ top: `${top}px`, height: `${height}px`, width, left }}
-                  onClick={() => onSelectReserva(r)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onSelectReserva(r)
+                  }}
                 >
                   <div className="flex flex-col md:flex-row md:justify-between font-semibold mb-1">
                     <span className="truncate">{r.expand?.medico_id?.nome}</span>

@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { ptBR } from 'date-fns/locale'
 import {
   format,
   parseISO,
@@ -8,8 +9,10 @@ import {
   isBefore,
   startOfMonth,
   endOfMonth,
+  subMonths,
+  addMonths,
 } from 'date-fns'
-import { ArrowLeft, Edit, Clock, Users, CalendarRange } from 'lucide-react'
+import { ArrowLeft, Edit, Clock, Users, CalendarRange, ChevronLeft, ChevronRight } from 'lucide-react'
 import { getMedico, type Medico } from '@/services/medicos'
 import { getAgendamentosPorMedico } from '@/services/reservas'
 import { useAuth } from '@/hooks/use-auth'
@@ -38,7 +41,7 @@ export default function MedicoDetails() {
   const [agendamentos, setAgendamentos] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [statsPeriod] = useState(new Date())
+  const [statsPeriod, setStatsPeriod] = useState(new Date())
 
   const isClinica = user?.tipo_acesso === 'clinica'
 
@@ -183,9 +186,28 @@ export default function MedicoDetails() {
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex justify-between items-center">
                 Desempenho
-                <span className="text-xs font-normal text-muted-foreground bg-muted px-2 py-1 rounded">
-                  {format(statsPeriod, 'MMMM yyyy')}
-                </span>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => setStatsPeriod((d) => subMonths(d, 1))}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="text-xs font-normal text-muted-foreground bg-muted px-2 py-1 rounded min-w-[90px] text-center">
+                    {format(statsPeriod, 'MMM yyyy', { locale: ptBR })}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => setStatsPeriod((d) => addMonths(d, 1))}
+                    disabled={statsPeriod >= startOfMonth(new Date())}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 pt-4">

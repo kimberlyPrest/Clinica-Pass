@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -31,6 +31,9 @@ interface BookingModalProps {
   medicos: Medico[]
   salas: Sala[]
   onSaved: () => void
+  initialDate?: string
+  initialTime?: string
+  initialSalaId?: string
 }
 
 interface Slot {
@@ -46,15 +49,26 @@ export default function BookingModal({
   medicos,
   salas,
   onSaved,
+  initialDate,
+  initialTime,
+  initialSalaId,
 }: BookingModalProps) {
   const { toast } = useToast()
   const [medicoId, setMedicoId] = useState('')
   const [slots, setSlots] = useState<Slot[]>([])
 
-  const [currentDate, setCurrentDate] = useState('')
-  const [currentTime, setCurrentTime] = useState('09:00')
+  const [currentDate, setCurrentDate] = useState(initialDate ?? '')
+  const [currentTime, setCurrentTime] = useState(initialTime ?? '09:00')
+
+  useEffect(() => {
+    if (open) {
+      setCurrentDate(initialDate ?? '')
+      setCurrentTime(initialTime ?? '09:00')
+      if (initialSalaId) setSalaId(initialSalaId)
+    }
+  }, [open, initialDate, initialTime, initialSalaId])
   const [duration, setDuration] = useState(1)
-  const [salaId, setSalaId] = useState('')
+  const [salaId, setSalaId] = useState(initialSalaId ?? '')
   const [isSaving, setIsSaving] = useState(false)
 
   const handleAddSlot = () => {

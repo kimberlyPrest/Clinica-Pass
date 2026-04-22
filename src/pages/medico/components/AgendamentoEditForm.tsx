@@ -9,11 +9,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { formatPhone } from '@/lib/utils'
 import { parseISO, format, addMinutes } from 'date-fns'
 import { updateAgendamento, getAgendamentosPorReserva } from '@/services/agendamentos'
 import pb from '@/lib/pocketbase/client'
 import { useToast } from '@/hooks/use-toast'
+import { checkConsultasDuration } from '@/lib/businessRules'
 import { CheckCircle2 } from 'lucide-react'
 
 interface Props {
@@ -36,6 +47,11 @@ export function AgendamentoEditForm({ agendamento, onSuccess, onCancel, setIsDir
   const [status, setStatus] = useState(agendamento.status || 'pendente')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [reserva, setReserva] = useState<any>(null)
+  const [overflowDialog, setOverflowDialog] = useState<{
+    open: boolean
+    minutosExcedidos: number
+    pendingFn: (() => Promise<void>) | null
+  }>({ open: false, minutosExcedidos: 0, pendingFn: null })
 
   useEffect(() => {
     pb.collection('reservas')
@@ -72,19 +88,41 @@ export function AgendamentoEditForm({ agendamento, onSuccess, onCancel, setIsDir
       }
 
       const agends = await getAgendamentosPorReserva(reserva.id)
-      let totalDurationMs = 0
       for (const ag of agends) {
         const s = parseISO(ag.hora_inicio)
         const e = parseISO(ag.hora_fim)
-        if (ag.id !== agendamento.id) totalDurationMs += e.getTime() - s.getTime()
         if (ag.id !== agendamento.id && newStart < e && newEnd > s) {
           return setErrors({ horaInicio: 'Conflito com outro agendamento neste horário.' })
         }
       }
-      const totalResMs = resEnd.getTime() - resStart.getTime()
-      const newDurMs = newEnd.getTime() - newStart.getTime()
-      if (totalDurationMs + newDurMs > totalResMs) {
-        return setErrors({ duracao: 'A duração excede o tempo total disponível.' })
+
+      const check = checkConsultasDuration(
+        agends,
+        { inicio: newStart, fim: newEnd },
+        reserva,
+        agendamento.id,
+      )
+
+      if (check.excede) {
+        const doUpdate = async () => {
+          await updateAgendamento(agendamento.id, {
+            paciente_telefone: telefone,
+            hora_inicio: newStart.toISOString(),
+            hora_fim: newEnd.toISOString(),
+            status,
+          })
+          toast({
+            title: (
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-green-500" />
+                <span>Agendamento atualizado</span>
+              </div>
+            ) as any,
+          })
+          onSuccess()
+        }
+        setOverflowDialog({ open: true, minutosExcedidos: check.minutosExcedidos, pendingFn: doUpdate })
+        return
       }
     }
 
@@ -110,6 +148,7 @@ export function AgendamentoEditForm({ agendamento, onSuccess, onCancel, setIsDir
   }
 
   return (
+    <>
     <div className="space-y-4 py-2">
       <div className="bg-muted/20 p-3 rounded-lg border">
         <div className="text-xs text-muted-foreground uppercase">Paciente (Apenas Leitura)</div>
@@ -188,5 +227,33 @@ export function AgendamentoEditForm({ agendamento, onSuccess, onCancel, setIsDir
         </Button>
       </div>
     </div>
+
+    <AlertDialog
+      open={overflowDialog.open}
+      onOpenChange={(open) => setOverflowDialog((p) => ({ ...p, open }))}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Tempo da Reserva Excedido</AlertDialogTitle>
+          <AlertDialogDescription>
+            Esta consulta ultrapassa o tempo reservado em{' '}
+            <strong>{overflowDialog.minutosExcedidos} minutos</strong>. O que deseja fazer?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="flex-col gap-2 sm:flex-row">
+          <AlertDialogCancel>Ajustar Duração</AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-[#05807f] hover:bg-[#05807f]/90"
+            onClick={async () => {
+              if (overflowDialog.pendingFn) await overflowDialog.pendingFn()
+              setOverflowDialog((p) => ({ ...p, open: false }))
+            }}
+          >
+            Salvar Mesmo Assim
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   )
 }

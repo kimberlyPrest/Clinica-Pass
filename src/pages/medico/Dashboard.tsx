@@ -22,7 +22,20 @@ import {
   type Reserva,
   type Agendamento,
 } from '@/services/agenda'
+import { MensalistaEditModal } from './components/MensalistaEditModal'
 import { CalendarDays, Clock, User, Phone, Mail, Stethoscope, Play } from 'lucide-react'
+
+const DAYS = [
+  { id: 'monday', label: 'Seg' },
+  { id: 'tuesday', label: 'Ter' },
+  { id: 'wednesday', label: 'Qua' },
+  { id: 'thursday', label: 'Qui' },
+  { id: 'friday', label: 'Sex' },
+]
+const HOURS = Array.from({ length: 11 }, (_, i) => {
+  const h = i + 9
+  return `${h < 10 ? '0' : ''}${h}:00`
+})
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -30,6 +43,7 @@ export default function Dashboard() {
   const [reservas, setReservas] = useState<Reserva[]>([])
   const [consultas, setConsultas] = useState<Agendamento[]>([])
   const [historico, setHistorico] = useState<Agendamento[]>([])
+  const [mensalistaModalOpen, setMensalistaModalOpen] = useState(false)
 
   const loadData = async () => {
     if (!user?.id) return
@@ -244,21 +258,37 @@ export default function Dashboard() {
             <CardContent>
               {medico.tipo === 'mensalista' ? (
                 <div className="space-y-3">
-                  <p className="text-sm text-muted-foreground">Horários Fixos:</p>
-                  <div className="p-3 bg-muted rounded-md text-sm font-medium">
-                    {medico.horarios_fixos ? (
-                      <pre className="whitespace-pre-wrap font-sans">
-                        {JSON.stringify(medico.horarios_fixos, null, 2)}
-                      </pre>
-                    ) : (
-                      'Seg/Qua/Sex 09:00-12:00 e 14:00-18:00 (Exemplo)'
-                    )}
+                  <p className="text-sm text-muted-foreground font-medium">Grade de Horários Fixos:</p>
+                  <div className="overflow-x-auto">
+                    <div className="min-w-[280px]">
+                      <div className="grid grid-cols-6 text-center text-xs font-medium text-muted-foreground pb-1 border-b">
+                        <div></div>
+                        {DAYS.map((d) => <div key={d.id}>{d.label}</div>)}
+                      </div>
+                      <div className="max-h-[200px] overflow-y-auto">
+                        {HOURS.map((hour) => (
+                          <div key={hour} className="grid grid-cols-6 text-center text-xs py-1 items-center border-b last:border-0">
+                            <div className="text-muted-foreground font-medium pr-1">{hour}</div>
+                            {DAYS.map((day) => {
+                              const isSelected = (medico.horarios_fixos?.[day.id] || []).includes(hour)
+                              return (
+                                <div key={`${day.id}-${hour}`} className="flex justify-center">
+                                  <div className={`w-3 h-3 rounded-full ${isSelected ? 'bg-primary' : 'bg-muted'}`} />
+                                </div>
+                              )
+                            })}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                   <div className="flex flex-col gap-2 pt-2">
-                    <Button variant="outline" size="sm">
-                      Editar / Cancelar Fixos
+                    <Button variant="outline" size="sm" onClick={() => setMensalistaModalOpen(true)}>
+                      Cancelar Horário Fixo
                     </Button>
-                    <Button size="sm">Reservar Mais Horários</Button>
+                    <Button size="sm" asChild>
+                      <Link to="/medico/reservas">Reservar Mais Horários</Link>
+                    </Button>
                   </div>
                 </div>
               ) : (
@@ -303,6 +333,14 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {medico && (
+        <MensalistaEditModal
+          medico={medico}
+          open={mensalistaModalOpen}
+          onOpenChange={setMensalistaModalOpen}
+        />
+      )}
     </div>
   )
 }

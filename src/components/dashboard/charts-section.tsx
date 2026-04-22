@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import {
   LineChart,
@@ -16,14 +17,48 @@ import { Button } from '@/components/ui/button'
 
 const pieColors = ['#05807f', '#77d4d3', '#f0dfd5']
 
-export function ChartsSection({ lineData, pieData }: { lineData: any[]; pieData: any[] }) {
-  const pieConfig = {
-    Consultórios: { label: 'Consultórios', color: pieColors[0] },
-    'Salas de Exame': { label: 'Salas de Exame', color: pieColors[1] },
-    Procedimentos: { label: 'Procedimentos', color: pieColors[2] },
-  }
+export function ChartsSection({
+  lineData,
+  pieData,
+  loading,
+}: {
+  lineData: any[]
+  pieData: any[]
+  loading?: boolean
+}) {
+  const pieConfig = pieData.reduce(
+    (acc, entry, i) => {
+      acc[entry.name] = { label: entry.name, color: pieColors[i % pieColors.length] }
+      return acc
+    },
+    {} as Record<string, { label: string; color: string }>,
+  )
 
   const total = pieData.reduce((acc, curr) => acc + curr.value, 0)
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2 shadow-sm border-border/50 rounded-2xl">
+          <CardContent className="p-6">
+            <Skeleton className="h-6 w-40 mb-4" />
+            <Skeleton className="h-[300px] w-full rounded-xl" />
+          </CardContent>
+        </Card>
+        <Card className="shadow-sm border-border/50 rounded-2xl">
+          <CardContent className="p-6">
+            <Skeleton className="h-6 w-40 mb-4" />
+            <Skeleton className="h-48 w-48 rounded-full mx-auto mb-4" />
+            <div className="space-y-3">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

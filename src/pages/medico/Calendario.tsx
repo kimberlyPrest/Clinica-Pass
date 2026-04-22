@@ -18,6 +18,7 @@ import {
   addDays,
   subDays,
   startOfDay,
+  endOfDay,
 } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { MedicoBookingModal } from './components/MedicoBookingModal'
@@ -37,16 +38,21 @@ import {
   Search,
   Calendar as CalendarIcon,
   List,
+  CalendarRange,
 } from 'lucide-react'
+import { Calendar } from '@/components/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 export default function Calendario() {
   const { user } = useAuth()
   const [medico, setMedico] = useState<any>(null)
 
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar')
-  const [calendarType, setCalendarType] = useState<'day' | 'week' | 'month'>('week')
+  const [calendarType, setCalendarType] = useState<'day' | 'week' | 'month' | 'custom'>('week')
   const [currentDate, setCurrentDate] = useState(new Date())
   const [search, setSearch] = useState('')
+  const [customStart, setCustomStart] = useState<Date | undefined>(new Date())
+  const [customEnd, setCustomEnd] = useState<Date | undefined>(new Date())
 
   const [reservas, setReservas] = useState<any[]>([])
   const [agendamentos, setAgendamentos] = useState<any[]>([])
@@ -71,8 +77,11 @@ export default function Calendario() {
 
   const loadData = async () => {
     if (!medico) return
-    let start, end
-    if (viewMode === 'list' || calendarType === 'month') {
+    let start: Date, end: Date
+    if (calendarType === 'custom') {
+      start = startOfDay(customStart ?? new Date())
+      end = endOfDay(addDays(customEnd ?? new Date(), 1))
+    } else if (viewMode === 'list' || calendarType === 'month') {
       start = startOfMonth(currentDate)
       end = endOfMonth(currentDate)
     } else if (calendarType === 'week') {
@@ -95,7 +104,7 @@ export default function Calendario() {
 
   useEffect(() => {
     loadData()
-  }, [medico, currentDate, viewMode, calendarType])
+  }, [medico, currentDate, viewMode, calendarType, customStart, customEnd])
 
   useRealtime('reservas', loadData)
   useRealtime('agendamentos', loadData)
@@ -103,16 +112,23 @@ export default function Calendario() {
   const handlePrev = () => {
     if (calendarType === 'month' || viewMode === 'list') setCurrentDate(subMonths(currentDate, 1))
     else if (calendarType === 'week') setCurrentDate(subWeeks(currentDate, 1))
-    else setCurrentDate(subDays(currentDate, 1))
+    else if (calendarType === 'day') setCurrentDate(subDays(currentDate, 1))
+    // 'custom' — prev/next not applicable
   }
 
   const handleNext = () => {
     if (calendarType === 'month' || viewMode === 'list') setCurrentDate(addMonths(currentDate, 1))
     else if (calendarType === 'week') setCurrentDate(addWeeks(currentDate, 1))
-    else setCurrentDate(addDays(currentDate, 1))
+    else if (calendarType === 'day') setCurrentDate(addDays(currentDate, 1))
+    // 'custom' — prev/next not applicable
   }
 
   const formatPeriod = () => {
+    if (calendarType === 'custom') {
+      if (customStart && customEnd)
+        return `${format(customStart, 'dd/MM/yyyy')} – ${format(customEnd, 'dd/MM/yyyy')}`
+      return 'Período personalizado'
+    }
     if (calendarType === 'month' || viewMode === 'list') {
       const formatted = format(currentDate, 'MMMM yyyy', { locale: ptBR })
       return formatted.charAt(0).toUpperCase() + formatted.slice(1)
@@ -178,23 +194,65 @@ export default function Calendario() {
                   <TabsTrigger value="day">Dia</TabsTrigger>
                   <TabsTrigger value="week">Semana</TabsTrigger>
                   <TabsTrigger value="month">Mês</TabsTrigger>
+                  <TabsTrigger value="custom">
+                    <CalendarRange className="w-3.5 h-3.5 mr-1" /> Período
+                  </TabsTrigger>
                 </TabsList>
               </Tabs>
             )}
           </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
-            <div className="flex items-center gap-2 bg-muted/20 rounded-lg border p-1 w-full sm:w-auto justify-between sm:justify-start">
-              <Button variant="ghost" size="icon" onClick={handlePrev} className="h-8 w-8">
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              <span className="font-semibold text-sm w-36 text-center text-[#05807f]">
-                {formatPeriod()}
-              </span>
-              <Button variant="ghost" size="icon" onClick={handleNext} className="h-8 w-8">
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </div>
+            {calendarType !== 'custom' && (
+              <div className="flex items-center gap-2 bg-muted/20 rounded-lg border p-1 w-full sm:w-auto justify-between sm:justify-start">
+                <Button variant="ghost" size="icon" onClick={handlePrev} className="h-8 w-8">
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <span className="font-semibold text-sm w-36 text-center text-[#05807f]">
+                  {formatPeriod()}
+                </span>
+                <Button variant="ghost" size="icon" onClick={handleNext} className="h-8 w-8">
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
+            {/* Custom period pickers */}
+            {calendarType === 'custom' && (
+              <div className="flex items-center gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="text-xs h-8">
+                      {customStart ? format(customStart, 'dd/MM/yyyy') : 'Início'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={customStart}
+                      onSelect={(d) => d && setCustomStart(d)}
+                      locale={ptBR}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <span className="text-muted-foreground text-xs">até</span>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="text-xs h-8">
+                      {customEnd ? format(customEnd, 'dd/MM/yyyy') : 'Fim'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={customEnd}
+                      onSelect={(d) => d && setCustomEnd(d)}
+                      locale={ptBR}
+                      disabled={(d) => (customStart ? d < customStart : false)}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
             <div className="relative w-full sm:w-64">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input

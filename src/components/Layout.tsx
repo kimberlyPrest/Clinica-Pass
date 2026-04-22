@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/use-auth'
 import pb from '@/lib/pocketbase/client'
@@ -10,10 +10,18 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarProvider,
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible'
 import {
   LayoutDashboard,
   Stethoscope,
@@ -24,7 +32,9 @@ import {
   User as UserIcon,
   Users,
   ChevronUp,
+  ChevronDown,
   ClipboardList,
+  Clock,
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -43,6 +53,16 @@ function LayoutContent() {
   const navigate = useNavigate()
   const { user, signOut } = useAuth()
   const { setOpen } = useSidebar()
+  const [medicoTipo, setMedicoTipo] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (user?.id && user?.tipo_acesso === 'medico') {
+      pb.collection('medicos')
+        .getFirstListItem(`usuario_id="${user.id}"`, { fields: 'id,tipo' })
+        .then((m) => setMedicoTipo(m.tipo))
+        .catch(() => {})
+    }
+  }, [user?.id])
 
   useEffect(() => {
     const handleResize = () => {
@@ -82,6 +102,11 @@ function LayoutContent() {
     { icon: Settings, label: 'Configurações', path: '/configuracoes' },
   ]
 
+  const mensalistaSubItems = [
+    { label: 'Meus Horários Fixos', path: '/medico/reservas' },
+    { label: 'Cancelar Horário', path: '/medico/dashboard' },
+  ]
+
   const navItems = isMedico ? medicoNavItems : clinicaNavItems
 
   const avatarUrl = user?.avatar ? pb.files.getURL(user, user.avatar) : ''
@@ -118,6 +143,51 @@ function LayoutContent() {
               const isActive =
                 location.pathname === item.path ||
                 (location.pathname.startsWith(item.path + '/') && item.path !== '/')
+              const isMensalistaReservas =
+                isMedico && medicoTipo === 'mensalista' && item.path === '/medico/reservas'
+
+              if (isMensalistaReservas) {
+                return (
+                  <Collapsible key={item.label} defaultOpen={isActive}>
+                    <SidebarMenuItem>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton
+                          isActive={isActive}
+                          tooltip={item.label}
+                          className={cn(
+                            'h-12 px-4 rounded-lg transition-all duration-200 font-sans text-[14px] w-full',
+                            isActive
+                              ? '!bg-[#05807f] !text-white hover:!bg-[#05807f]/90'
+                              : 'text-muted-foreground hover:!bg-[#f0dfd5] hover:!text-[#05807f]',
+                            'group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center',
+                          )}
+                        >
+                          <item.icon className={cn('w-5 h-5 shrink-0', isActive ? 'text-white' : 'text-muted-foreground')} />
+                          <span className="truncate group-data-[collapsible=icon]:hidden flex-1">
+                            {item.label}
+                          </span>
+                          <ChevronDown className="w-4 h-4 group-data-[collapsible=icon]:hidden shrink-0 transition-transform group-data-[state=open]:rotate-180" />
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <SidebarMenuSub className="group-data-[collapsible=icon]:hidden mt-1">
+                          {mensalistaSubItems.map((sub) => (
+                            <SidebarMenuSubItem key={sub.label}>
+                              <SidebarMenuSubButton asChild>
+                                <Link to={sub.path} className="flex items-center gap-2 text-xs">
+                                  <Clock className="w-3.5 h-3.5 shrink-0" />
+                                  {sub.label}
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                        </SidebarMenuSub>
+                      </CollapsibleContent>
+                    </SidebarMenuItem>
+                  </Collapsible>
+                )
+              }
+
               return (
                 <SidebarMenuItem key={item.label} className="transition-all duration-200">
                   <SidebarMenuButton

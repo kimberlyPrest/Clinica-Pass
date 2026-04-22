@@ -8,12 +8,13 @@ import { cn } from '@/lib/utils'
 interface Props {
   sala: Sala
   ocupacao: number
+  proximoUso: string
   onEdit: () => void
   onBlock: () => void
   onOpenAgenda: () => void
 }
 
-export function SalaCard({ sala, ocupacao, onEdit, onBlock, onOpenAgenda }: Props) {
+export function SalaCard({ sala, ocupacao, proximoUso, onEdit, onBlock, onOpenAgenda }: Props) {
   const isAtiva = sala.status === 'ativa'
 
   return (
@@ -46,7 +47,7 @@ export function SalaCard({ sala, ocupacao, onEdit, onBlock, onOpenAgenda }: Prop
               <CalendarDays className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium">Próximo uso</span>
             </div>
-            <span className="text-sm text-primary font-bold">Hoje, 14:30</span>
+            <span className="text-sm text-primary font-bold">{proximoUso}</span>
           </div>
 
           <div>

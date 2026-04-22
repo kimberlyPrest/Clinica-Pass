@@ -1,5 +1,6 @@
 import { KpiData } from './types'
 import { Card, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   LineChart,
   Stethoscope,
@@ -10,13 +11,13 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export function KpiGrid({ data }: { data: KpiData }) {
+export function KpiGrid({ data, loading }: { data: KpiData; loading?: boolean }) {
   const items = [
     {
       title: 'Taxa Ocupação (%)',
       value: `${data.occupancyRate.toFixed(1)}%`,
       icon: LineChart,
-      trend: '+ 4.2%',
+      trend: '',
       trendType: 'positive',
       subtext: '',
     },
@@ -25,13 +26,13 @@ export function KpiGrid({ data }: { data: KpiData }) {
       value: data.activeDoctors,
       icon: Stethoscope,
       trend: '',
-      subtext: '/ 30',
+      subtext: '',
     },
     {
       title: 'Salas Disponíveis',
       value: data.availableRooms.toString().padStart(2, '0'),
       icon: DoorOpen,
-      trend: 'Baixa',
+      trend: data.availableRooms === 0 ? 'Todas ocupadas' : '',
       trendType: 'warning',
       subtext: '',
     },
@@ -39,11 +40,31 @@ export function KpiGrid({ data }: { data: KpiData }) {
       title: 'Agendamentos (Próx 7 dias)',
       value: data.upcomingAppointments,
       icon: CalendarDays,
-      trend: '+ 12%',
+      trend: '',
       trendType: 'positive',
       subtext: '',
     },
   ]
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Card key={i} className="border-border/50 shadow-sm rounded-2xl">
+            <CardContent className="p-6 space-y-4">
+              <div className="flex justify-between items-start">
+                <Skeleton className="h-12 w-12 rounded-xl" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-28" />
+                <Skeleton className="h-8 w-20" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
+  }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
