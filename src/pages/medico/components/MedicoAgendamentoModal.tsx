@@ -79,56 +79,93 @@ export function MedicoAgendamentoModal({
     }
   }, [open, medicoId, preSelectedReservaId])
 
+  const [existingAgendamentos, setExistingAgendamentos] = useState<any[]>([])
+
+  useEffect(() => {
+    if (reservaId && reservaId !== 'none') {
+      pb.collection('agendamentos')
+        .getFullList({ filter: `reserva_id="${reservaId}" && status != 'cancelada'` })
+        .then(setExistingAgendamentos)
+    } else {
+      setExistingAgendamentos([])
+    }
+  }, [reservaId])
+
   useEffect(() => {
     if (nome.length > 2 && showSuggestions) {
-      pb.collection('agendamentos')
-        .getList(1, 5, { filter: `paciente_nome ~ "${nome}"` })
+      pb.collection('pacientes')
+        .getList(1, 5, { filter: `nome ~ "${nome}" && medico_id = "${medicoId}"` })
         .then((res) => {
-          const unique = Array.from(
-            new Map(res.items.map((item) => [item.paciente_nome, item])).values(),
-          )
-          setSuggestions(unique)
+          setSuggestions(res.items)
         })
     } else {
       setSuggestions([])
     }
-  }, [nome, showSuggestions])
+  }, [nome, showSuggestions, medicoId])
 
   const handleSelectSuggestion = (s: any) => {
-    setNome(s.paciente_nome)
-    setTelefone(s.paciente_telefone || '')
+    setNome(s.nome)
+    setTelefone(s.telefone || '')
     setShowSuggestions(false)
-  }
-
-  const handleAddPaciente = () => {
-    if (!nome || !telefone || !duration) return
-    setPacientes([...pacientes, { nome, telefone, duration }])
-    setNome('')
-    setTelefone('')
-    setDuration(60)
   }
 
   const selectedReserva = reservas.find((r) => r.id === reservaId)
   const totalReservaMins = selectedReserva
     ? differenceInMinutes(new Date(selectedReserva.data_fim), new Date(selectedReserva.data_inicio))
     : 0
-  const usedMins = pacientes.reduce((acc, p) => acc + p.duration, 0)
+
+  const existingMins = existingAgendamentos.reduce((acc, a) => {
+    return acc + differenceInMinutes(new Date(a.hora_fim), new Date(a.hora_inicio))
+  }, 0)
+
+  const usedMins = existingMins + pacientes.reduce((acc, p) => acc + p.duration, 0)
   const hasConflict = usedMins > totalReservaMins
+
+  const handleAddPaciente = () => {
+    if (!nome || !telefone || !duration) return
+    const newTotal = usedMins + duration
+    if (newTotal > totalReservaMins) {
+      toast({
+        title: 'Tempo insuficiente',
+        description: 'A duração total ultrapassa o tempo disponível na reserva.',
+        variant: 'destructive',
+      })
+      return
+    }
+    setPacientes([...pacientes, { nome, telefone, duration }])
+    setNome('')
+    setTelefone('')
+    setDuration(60)
+  }
 
   const handleSave = async () => {
     if (!selectedReserva) return
-    if (hasConflict) {
-      if (
-        !confirm(
-          'A duração total dos agendamentos excede o tempo da reserva da sala. Deseja continuar mesmo assim?',
-        )
-      )
-        return
-    }
+
     try {
       let currentStart = new Date(selectedReserva.data_inicio)
+
+      if (existingAgendamentos.length > 0) {
+        const lastAgendamento = [...existingAgendamentos].sort(
+          (a, b) => new Date(b.hora_fim).getTime() - new Date(a.hora_fim).getTime(),
+        )[0]
+        currentStart = new Date(lastAgendamento.hora_fim)
+      }
+
       for (const p of pacientes) {
         const end = addMinutes(currentStart, p.duration)
+
+        try {
+          await pb
+            .collection('pacientes')
+            .getFirstListItem(`nome="${p.nome}" && medico_id="${medicoId}"`)
+        } catch (_) {
+          await pb.collection('pacientes').create({
+            nome: p.nome,
+            telefone: p.telefone,
+            medico_id: medicoId,
+          })
+        }
+
         await pb.collection('agendamentos').create({
           reserva_id: selectedReserva.id,
           paciente_nome: p.nome,
@@ -201,15 +238,15 @@ export function MedicoAgendamentoModal({
                     className="bg-background"
                   />
                   {suggestions.length > 0 && showSuggestions && (
-                    <div className="absolute top-full left-0 w-full bg-background border rounded-md shadow-lg z-10 mt-1">
+                    <div className="absolute top-full left-0 w-full bg-background border rounded-md shadow-lg z-10 mt-1 max-h-40 overflow-y-auto">
                       {suggestions.map((s) => (
                         <div
                           key={s.id}
                           className="p-3 hover:bg-muted cursor-pointer text-sm border-b last:border-0"
                           onClick={() => handleSelectSuggestion(s)}
                         >
-                          <div className="font-medium">{s.paciente_nome}</div>
-                          <div className="text-xs text-muted-foreground">{s.paciente_telefone}</div>
+                          <div className="font-medium">{s.nome}</div>
+                          <div className="text-xs text-muted-foreground">{s.telefone}</div>
                         </div>
                       ))}
                     </div>
@@ -261,8 +298,7 @@ export function MedicoAgendamentoModal({
                 <Alert variant="destructive" className="py-3">
                   <AlertTriangle className="h-4 w-4" />
                   <AlertDescription>
-                    Atenção: O tempo programado para as consultas excede a duração da sua reserva da
-                    sala.
+                    Atenção: O tempo programado atinge ou excede a duração da reserva da sala.
                   </AlertDescription>
                 </Alert>
               )}
