@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-04-22T18:06:02.885Z",
+  "generatedAt": "2026-04-22T18:11:43.358Z",
   "collections": [
     {
       "name": "users",
       "type": "auth",
       "apiRules": {
-        "list": "id = @request.auth.id",
-        "view": "id = @request.auth.id",
+        "list": "@request.auth.id != '' && (id = @request.auth.id || @request.auth.tipo_acesso = 'clinica')",
+        "view": "@request.auth.id != '' && (id = @request.auth.id || @request.auth.tipo_acesso = 'clinica')",
         "create": "",
-        "update": "id = @request.auth.id",
-        "delete": "id = @request.auth.id"
+        "update": "@request.auth.id != '' && (id = @request.auth.id || @request.auth.tipo_acesso = 'clinica')",
+        "delete": "@request.auth.id != '' && @request.auth.tipo_acesso = 'clinica'"
       },
       "fields": [
         {
@@ -37,12 +37,343 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "tipo_acesso",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["clinica", "medico"]
         }
       ],
       "indexes": [
         "CREATE UNIQUE INDEX `idx_tokenKey__pb_users_auth_` ON `users` (`tokenKey`)",
         "CREATE UNIQUE INDEX `idx_email__pb_users_auth_` ON `users` (`email`) WHERE `email` != ''"
       ]
+    },
+    {
+      "name": "medicos",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != '' && (usuario_id = @request.auth.id || @request.auth.tipo_acesso = 'clinica')",
+        "view": "@request.auth.id != '' && (usuario_id = @request.auth.id || @request.auth.tipo_acesso = 'clinica')",
+        "create": "@request.auth.id != '' && @request.auth.tipo_acesso = 'clinica'",
+        "update": "@request.auth.id != '' && (usuario_id = @request.auth.id || @request.auth.tipo_acesso = 'clinica')",
+        "delete": "@request.auth.id != '' && @request.auth.tipo_acesso = 'clinica'"
+      },
+      "fields": [
+        {
+          "name": "usuario_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "users"
+        },
+        {
+          "name": "nome",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "especialidade",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "tipo",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["mensalista", "avulso"]
+        },
+        {
+          "name": "email",
+          "type": "email",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "telefone",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "horarios_fixos",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE UNIQUE INDEX idx_medicos_usuario ON medicos (usuario_id)"]
+    },
+    {
+      "name": "salas",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != '' && @request.auth.tipo_acesso = 'clinica'",
+        "update": "@request.auth.id != '' && @request.auth.tipo_acesso = 'clinica'",
+        "delete": "@request.auth.id != '' && @request.auth.tipo_acesso = 'clinica'"
+      },
+      "fields": [
+        {
+          "name": "nome",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "status",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["ativa", "inativa"]
+        },
+        {
+          "name": "horario_inicio",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "horario_fim",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "reservas",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != '' && (medico_id.usuario_id = @request.auth.id || @request.auth.tipo_acesso = 'clinica')",
+        "view": "@request.auth.id != '' && (medico_id.usuario_id = @request.auth.id || @request.auth.tipo_acesso = 'clinica')",
+        "create": "@request.auth.id != '' && @request.auth.tipo_acesso = 'clinica'",
+        "update": "@request.auth.id != '' && @request.auth.tipo_acesso = 'clinica'",
+        "delete": "@request.auth.id != '' && @request.auth.tipo_acesso = 'clinica'"
+      },
+      "fields": [
+        {
+          "name": "medico_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "medicos"
+        },
+        {
+          "name": "sala_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "salas"
+        },
+        {
+          "name": "data_inicio",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "data_fim",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "status",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["ativa", "cancelada"]
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "agendamentos",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != '' && (reserva_id.medico_id.usuario_id = @request.auth.id || @request.auth.tipo_acesso = 'clinica')",
+        "view": "@request.auth.id != '' && (reserva_id.medico_id.usuario_id = @request.auth.id || @request.auth.tipo_acesso = 'clinica')",
+        "create": "@request.auth.id != '' && @request.auth.tipo_acesso = 'clinica'",
+        "update": "@request.auth.id != '' && @request.auth.tipo_acesso = 'clinica'",
+        "delete": "@request.auth.id != '' && @request.auth.tipo_acesso = 'clinica'"
+      },
+      "fields": [
+        {
+          "name": "reserva_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "reservas"
+        },
+        {
+          "name": "paciente_nome",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "paciente_telefone",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "hora_inicio",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "hora_fim",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "status",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["confirmado", "pendente", "realizado"]
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "bloqueios",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != '' && @request.auth.tipo_acesso = 'clinica'",
+        "update": "@request.auth.id != '' && @request.auth.tipo_acesso = 'clinica'",
+        "delete": "@request.auth.id != '' && @request.auth.tipo_acesso = 'clinica'"
+      },
+      "fields": [
+        {
+          "name": "sala_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "salas"
+        },
+        {
+          "name": "tipo",
+          "type": "select",
+          "required": true,
+          "system": false,
+          "selectValues": ["pontual", "diario", "semanal", "mensal", "periodo"]
+        },
+        {
+          "name": "data_inicio",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "data_fim",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "hora_inicio",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "hora_fim",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "dias_semana",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": []
     }
   ]
 }

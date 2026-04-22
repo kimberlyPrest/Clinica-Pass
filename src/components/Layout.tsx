@@ -1,4 +1,6 @@
-import { Outlet, Link, useLocation } from 'react-router-dom'
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '@/hooks/use-auth'
+import pb from '@/lib/pocketbase/client'
 import {
   Sidebar,
   SidebarContent,
@@ -16,20 +18,38 @@ import {
   CalendarDays,
   Building2,
   LogOut,
-  PlusSquare,
+  User,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 
 export default function Layout() {
   const location = useLocation()
+  const navigate = useNavigate()
+  const { user, signOut } = useAuth()
 
-  const navItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-    { icon: Stethoscope, label: 'Médicos', path: '/medicos' },
-    { icon: DoorOpen, label: 'Salas', path: '/salas' },
-    { icon: CalendarDays, label: 'Agenda', path: '/agenda' },
-  ]
+  const handleLogout = () => {
+    signOut()
+    navigate('/login')
+  }
+
+  const isMedico = user?.tipo_acesso === 'medico'
+
+  const navItems = isMedico
+    ? [
+        { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard-medico' },
+        { icon: CalendarDays, label: 'Minha Agenda', path: '/agenda' },
+      ]
+    : [
+        { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+        { icon: Stethoscope, label: 'Médicos', path: '/medicos' },
+        { icon: DoorOpen, label: 'Salas', path: '/salas' },
+        { icon: CalendarDays, label: 'Agenda', path: '/agenda' },
+      ]
+
+  const avatarUrl = user?.avatar ? pb.files.getURL(user, user.avatar) : ''
+  const displayRole = isMedico ? 'Médico' : 'Admin Clínica'
 
   return (
     <SidebarProvider>
@@ -37,12 +57,17 @@ export default function Layout() {
         <Sidebar className="border-r bg-card/50">
           <SidebarHeader className="p-6 border-b border-border/50">
             <div className="flex flex-col items-center gap-4 text-center mt-4">
-              <div className="w-14 h-14 bg-primary rounded-full flex items-center justify-center text-primary-foreground shadow-sm">
-                <PlusSquare className="w-7 h-7" />
-              </div>
+              <Avatar className="w-16 h-16 shadow-sm border-2 border-primary/20">
+                <AvatarImage src={avatarUrl} alt={user?.name || 'User'} />
+                <AvatarFallback className="bg-primary/10 text-primary">
+                  {user?.name ? user.name.charAt(0).toUpperCase() : <User className="w-8 h-8" />}
+                </AvatarFallback>
+              </Avatar>
               <div>
-                <h2 className="text-xl font-display font-bold text-primary">Dr. Clinic Admin</h2>
-                <p className="text-xs text-muted-foreground mt-1">Nível de Acesso: Médico/Admin</p>
+                <h2 className="text-xl font-display font-bold text-primary">
+                  {user?.name || 'Usuário'}
+                </h2>
+                <p className="text-xs text-muted-foreground mt-1 capitalize">{displayRole}</p>
               </div>
             </div>
           </SidebarHeader>
@@ -78,16 +103,19 @@ export default function Layout() {
             </SidebarMenu>
           </SidebarContent>
           <SidebarFooter className="p-6 space-y-4 border-t border-border/50">
-            <Button
-              variant="secondary"
-              className="w-full justify-start gap-3 bg-secondary/30 hover:bg-secondary/50 text-primary font-bold"
-            >
-              <Building2 className="w-4 h-4" />
-              SELECIONAR UNIDADE
-            </Button>
+            {!isMedico && (
+              <Button
+                variant="secondary"
+                className="w-full justify-start gap-3 bg-secondary/30 hover:bg-secondary/50 text-primary font-bold"
+              >
+                <Building2 className="w-4 h-4" />
+                SELECIONAR UNIDADE
+              </Button>
+            )}
             <Button
               variant="ghost"
-              className="w-full justify-center gap-3 text-muted-foreground hover:text-foreground"
+              onClick={handleLogout}
+              className="w-full justify-center gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
             >
               <LogOut className="w-4 h-4" />
               Sair
