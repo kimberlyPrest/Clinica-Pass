@@ -18,12 +18,15 @@ import { getSalas } from '@/services/salas'
 import { Bell, SlidersHorizontal } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import { useAuth } from '@/hooks/use-auth'
+import pb from '@/lib/pocketbase/client'
 import { SidebarTrigger } from '@/components/ui/sidebar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 const DOCTOR_TYPE_OPTIONS = ['Mensalista', 'Avulso']
 
 export default function Index() {
+  const { user } = useAuth()
   const [roomOptions, setRoomOptions] = useState<string[]>([])
   const [filters, setFilters] = useState<DashboardFilters>({
     period: 'Mês',
@@ -124,6 +127,16 @@ export default function Index() {
 
   const today = format(new Date(), "d 'de' MMMM", { locale: ptBR })
 
+  const avatarUrl = user?.avatar ? pb.files.getURL(user, user.avatar) : ''
+  const initials = user?.name
+    ? user.name
+        .split(' ')
+        .map((n: string) => n[0])
+        .join('')
+        .substring(0, 2)
+        .toUpperCase()
+    : 'US'
+
   return (
     <div className="min-h-full bg-[#f7f9fb] text-[#191c1e] p-4 md:p-8 font-sans">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -171,8 +184,10 @@ export default function Index() {
               <Bell className="w-5 h-5 text-muted-foreground" />
             </Button>
             <Avatar className="w-10 h-10 border-2 border-card shadow-sm cursor-pointer">
-              <AvatarImage src="https://img.usecurling.com/ppl/thumbnail?gender=male&seed=1" />
-              <AvatarFallback>AD</AvatarFallback>
+              <AvatarImage src={avatarUrl} alt={user?.name || 'User'} />
+              <AvatarFallback className="bg-[#05807f]/10 text-[#05807f] font-bold">
+                {initials}
+              </AvatarFallback>
             </Avatar>
           </div>
         </header>
