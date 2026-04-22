@@ -2,6 +2,8 @@ import { format, parseISO, isPast } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Button } from '@/components/ui/button'
 import { Clock, User, AlertCircle, Calendar } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { cn } from '@/lib/utils'
 
 interface Props {
   reservas: any[]
@@ -9,6 +11,7 @@ interface Props {
   onOpenAgendamento: (id: string) => void
   onSelectReserva: (r: any) => void
   onSelectAgendamento: (a: any) => void
+  onStatusChange: (id: string, status: string, hora_inicio: string) => void
 }
 
 export function MedicoListView({
@@ -17,6 +20,7 @@ export function MedicoListView({
   onOpenAgendamento,
   onSelectReserva,
   onSelectAgendamento,
+  onStatusChange,
 }: Props) {
   const sortedReservas = [...reservas].sort((a, b) => a.data_inicio.localeCompare(b.data_inicio))
 
@@ -117,9 +121,38 @@ export function MedicoListView({
                         </div>
                       </div>
                     </div>
-                    <div className="text-[10px] bg-muted px-2 py-1 rounded border uppercase font-bold tracking-wider ml-5 sm:ml-0 self-start sm:self-center">
-                      {a.status}
-                    </div>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <div
+                          onClick={(e) => e.stopPropagation()}
+                          className={cn(
+                            'text-[10px] px-2 py-1 rounded border uppercase font-bold tracking-wider ml-5 sm:ml-0 self-start sm:self-center cursor-pointer hover:opacity-80 transition-opacity',
+                            a.status === 'confirmado'
+                              ? 'bg-green-100 text-green-800 border-green-200'
+                              : a.status === 'pendente'
+                                ? 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                                : 'bg-gray-100 text-gray-800 border-gray-200',
+                          )}
+                        >
+                          {a.status}
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-40 p-2" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex flex-col gap-1">
+                          {['pendente', 'confirmado', 'realizado'].map((s) => (
+                            <Button
+                              key={s}
+                              variant="ghost"
+                              size="sm"
+                              className="justify-start text-xs uppercase font-semibold"
+                              onClick={() => onStatusChange(a.id, s, a.hora_inicio)}
+                            >
+                              {s}
+                            </Button>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 ))}
               </div>

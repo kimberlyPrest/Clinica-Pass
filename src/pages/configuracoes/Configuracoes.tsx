@@ -1,7 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Users, Shield } from 'lucide-react'
+import { Users, Shield, UserSquare } from 'lucide-react'
 import { UsuariosTable } from '@/components/configuracoes/UsuariosTable'
 import { PermissoesTable } from '@/components/configuracoes/PermissoesTable'
+import { CamposCustomizadosTable } from '@/components/configuracoes/CamposCustomizadosTable'
 import { PageWrapper, PageHeader, DSCard, DSCardHeader } from '@/components/ui/design-system'
 
 export default function Configuracoes() {
@@ -31,6 +32,15 @@ export default function Configuracoes() {
               <Shield className="w-4 h-4" />
               Permissões
             </TabsTrigger>
+            <TabsTrigger
+              value="pacientes"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-[#6e7979]
+                data-[state=active]:bg-[#05807f] data-[state=active]:text-white data-[state=active]:shadow-sm
+                hover:bg-[#f0dfd5] hover:text-[#05807f] transition-all duration-200"
+            >
+              <UserSquare className="w-4 h-4" />
+              Pacientes
+            </TabsTrigger>
           </TabsList>
         </div>
 
@@ -54,6 +64,18 @@ export default function Configuracoes() {
             />
             <div className="p-6">
               <PermissoesTable />
+            </div>
+          </DSCard>
+        </TabsContent>
+
+        <TabsContent value="pacientes" className="mt-0">
+          <DSCard padded={false}>
+            <DSCardHeader
+              title="Campos Customizados"
+              subtitle="Configure os campos clínicos adicionais para os pacientes"
+            />
+            <div className="p-6">
+              <CamposCustomizadosTable />
             </div>
           </DSCard>
         </TabsContent>

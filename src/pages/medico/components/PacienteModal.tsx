@@ -35,6 +35,9 @@ export function PacienteModal({ open, onOpenChange, medicoId, paciente, onSaved 
   const { user } = useAuth()
   const [saving, setSaving] = useState(false)
   const [medicos, setMedicos] = useState<any[]>([])
+  const [customFieldsConfig, setCustomFieldsConfig] = useState<any[]>([])
+
+  const isEdit = !!paciente
 
   const [formData, setFormData] = useState({
     nome: '',
@@ -43,14 +46,21 @@ export function PacienteModal({ open, onOpenChange, medicoId, paciente, onSaved 
     cpf: '',
     email: '',
     endereco: '',
-    anamnese: '',
-    medicacoes: '',
-    notas_internas: '',
     medico_id: medicoId,
   })
 
+  const [customData, setCustomData] = useState<Record<string, any>>({})
+
   useEffect(() => {
     if (open) {
+      const activeMedico = paciente?.medico_id || medicoId
+      if (activeMedico) {
+        pb.collection('medico_campos_customizados')
+          .getFullList({ filter: `medico_id="${activeMedico}" && ativo=true`, sort: 'ordem' })
+          .then(setCustomFieldsConfig)
+          .catch(() => {})
+      }
+
       if (paciente) {
         setFormData({
           nome: paciente.nome,
@@ -59,10 +69,15 @@ export function PacienteModal({ open, onOpenChange, medicoId, paciente, onSaved 
           cpf: paciente.cpf || '',
           email: paciente.email || '',
           endereco: paciente.endereco || '',
-          anamnese: paciente.anamnese || '',
-          medicacoes: paciente.medicacoes || '',
-          notas_internas: paciente.notas_internas || '',
           medico_id: paciente.medico_id,
+        })
+
+        const parsedCustomData = (paciente as any).dados_customizados || {}
+        setCustomData({
+          Anamnese: paciente.anamnese || parsedCustomData['Anamnese'] || '',
+          Medicações: paciente.medicacoes || parsedCustomData['Medicações'] || '',
+          'Notas Internas': paciente.notas_internas || parsedCustomData['Notas Internas'] || '',
+          ...parsedCustomData,
         })
       } else {
         setFormData({
@@ -72,11 +87,9 @@ export function PacienteModal({ open, onOpenChange, medicoId, paciente, onSaved 
           cpf: '',
           email: '',
           endereco: '',
-          anamnese: '',
-          medicacoes: '',
-          notas_internas: '',
           medico_id: medicoId,
         })
+        setCustomData({})
       }
 
       if (user?.tipo_acesso === 'clinica') {
@@ -90,6 +103,10 @@ export function PacienteModal({ open, onOpenChange, medicoId, paciente, onSaved 
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleCustomChange = (field: string, value: string) => {
+    setCustomData((prev) => ({ ...prev, [field]: value }))
   }
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,19 +140,28 @@ export function PacienteModal({ open, onOpenChange, medicoId, paciente, onSaved 
 
     setSaving(true)
     try {
-      const dataToSave = {
+      const dataToSave: any = {
         ...formData,
         data_nascimento: formData.data_nascimento
           ? new Date(formData.data_nascimento + 'T12:00:00').toISOString()
           : '',
+        anamnese: customData['Anamnese'] || '',
+        medicacoes: customData['Medicações'] || '',
+        notas_internas: customData['Notas Internas'] || '',
       }
+
+      const restCustomData = { ...customData }
+      delete restCustomData['Anamnese']
+      delete restCustomData['Medicações']
+      delete restCustomData['Notas Internas']
+      dataToSave.dados_customizados = restCustomData
 
       if (paciente) {
         await updatePaciente(paciente.id, dataToSave)
-        toast({ title: 'Paciente atualizado' })
+        toast({ title: 'Paciente atualizado com sucesso' })
       } else {
         await createPaciente(dataToSave)
-        toast({ title: 'Paciente registrado' })
+        toast({ title: 'Paciente registrado com sucesso' })
       }
       onSaved()
     } catch (e: any) {
@@ -156,7 +182,7 @@ export function PacienteModal({ open, onOpenChange, medicoId, paciente, onSaved 
 
         <div className="space-y-6 py-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {user?.tipo_acesso === 'clinica' && (
+            {user?.tipo_acesso === 'clinica' && !isEdit && (
               <div className="space-y-2 md:col-span-2">
                 <Label>
                   Médico Responsável <span className="text-red-500">*</span>
@@ -183,7 +209,12 @@ export function PacienteModal({ open, onOpenChange, medicoId, paciente, onSaved 
               <Label>
                 Nome Completo <span className="text-red-500">*</span>
               </Label>
-              <Input value={formData.nome} onChange={(e) => handleChange('nome', e.target.value)} />
+              <Input
+                value={formData.nome}
+                onChange={(e) => handleChange('nome', e.target.value)}
+                readOnly={isEdit}
+                disabled={isEdit}
+              />
             </div>
 
             <div className="space-y-2">
@@ -194,6 +225,8 @@ export function PacienteModal({ open, onOpenChange, medicoId, paciente, onSaved 
                 value={formData.telefone}
                 onChange={handlePhoneChange}
                 placeholder="(00) 00000-0000"
+                readOnly={isEdit}
+                disabled={isEdit}
               />
             </div>
 
@@ -230,38 +263,42 @@ export function PacienteModal({ open, onOpenChange, medicoId, paciente, onSaved 
             </div>
           </div>
 
-          <div className="space-y-4 border-t pt-4">
-            <h4 className="font-semibold text-gray-700">Informações Clínicas</h4>
-
-            <div className="space-y-2">
-              <Label>Anamnese / Histórico Principal</Label>
-              <Textarea
-                value={formData.anamnese}
-                onChange={(e) => handleChange('anamnese', e.target.value)}
-                className="min-h-[100px]"
-                placeholder="Descreva o histórico do paciente..."
-              />
+          {customFieldsConfig.length > 0 && (
+            <div className="space-y-4 border-t pt-4">
+              <h4 className="font-semibold text-gray-700">Informações Clínicas</h4>
+              <div className="grid grid-cols-1 gap-4">
+                {customFieldsConfig.map((field) => (
+                  <div key={field.id} className="space-y-2">
+                    <Label>{field.nome_campo}</Label>
+                    {field.tipo === 'textarea' ? (
+                      <Textarea
+                        value={customData[field.nome_campo] || ''}
+                        onChange={(e) => handleCustomChange(field.nome_campo, e.target.value)}
+                        className="min-h-[80px]"
+                      />
+                    ) : field.tipo === 'date' ? (
+                      <Input
+                        type="date"
+                        value={customData[field.nome_campo] || ''}
+                        onChange={(e) => handleCustomChange(field.nome_campo, e.target.value)}
+                      />
+                    ) : field.tipo === 'number' ? (
+                      <Input
+                        type="number"
+                        value={customData[field.nome_campo] || ''}
+                        onChange={(e) => handleCustomChange(field.nome_campo, e.target.value)}
+                      />
+                    ) : (
+                      <Input
+                        value={customData[field.nome_campo] || ''}
+                        onChange={(e) => handleCustomChange(field.nome_campo, e.target.value)}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-
-            <div className="space-y-2">
-              <Label>Medicações em Uso</Label>
-              <Textarea
-                value={formData.medicacoes}
-                onChange={(e) => handleChange('medicacoes', e.target.value)}
-                className="min-h-[80px]"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Notas Internas (Privado)</Label>
-              <Textarea
-                value={formData.notas_internas}
-                onChange={(e) => handleChange('notas_internas', e.target.value)}
-                className="min-h-[80px] bg-amber-50"
-                placeholder="Anotações visíveis apenas para a clínica..."
-              />
-            </div>
-          </div>
+          )}
         </div>
 
         <DialogFooter>

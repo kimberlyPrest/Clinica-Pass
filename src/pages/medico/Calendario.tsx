@@ -65,6 +65,29 @@ export default function Calendario() {
   const [agendamentoDetailsOpen, setAgendamentoDetailsOpen] = useState(false)
   const [selectedReserva, setSelectedReserva] = useState<any>(null)
   const [selectedAgendamento, setSelectedAgendamento] = useState<any>(null)
+  const { toast } = useToast()
+
+  const handleStatusChange = async (id: string, status: string, hora_inicio: string) => {
+    if (startOfDay(parseISO(hora_inicio)) < startOfDay(new Date())) {
+      toast({
+        title: 'Acesso negado',
+        description: 'Este agendamento já passou',
+        variant: 'destructive',
+      })
+      return
+    }
+    try {
+      await pb.collection('agendamentos').update(id, { status })
+      toast({ title: 'Status atualizado' })
+      loadData()
+    } catch (e) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível atualizar o status',
+        variant: 'destructive',
+      })
+    }
+  }
 
   useEffect(() => {
     if (user?.id) {
@@ -284,6 +307,7 @@ export default function Calendario() {
                 setSelectedAgendamento(a)
                 setAgendamentoDetailsOpen(true)
               }}
+              onStatusChange={handleStatusChange}
             />
           ) : (
             <div className="w-full overflow-x-auto pb-4">
@@ -300,6 +324,7 @@ export default function Calendario() {
                     setSelectedAgendamento(a)
                     setAgendamentoDetailsOpen(true)
                   }}
+                  onStatusChange={handleStatusChange}
                 />
               )}
               {calendarType === 'week' && (
@@ -319,6 +344,7 @@ export default function Calendario() {
                     setCurrentDate(d)
                     setCalendarType('day')
                   }}
+                  onStatusChange={handleStatusChange}
                 />
               )}
               {calendarType === 'month' && (

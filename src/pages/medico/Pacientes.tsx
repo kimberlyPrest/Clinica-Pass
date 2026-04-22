@@ -66,10 +66,24 @@ export default function Pacientes() {
       p.telefone?.includes(search),
   )
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Deseja realmente excluir este paciente?')) return
+  const handleDelete = async (p: Paciente) => {
     try {
-      await deletePaciente(id)
+      const futureAgs = await pb.collection('agendamentos').getList(1, 1, {
+        filter: `paciente_nome = "${p.nome}" && hora_inicio > "${new Date().toISOString()}"`,
+      })
+
+      if (futureAgs.totalItems > 0) {
+        toast({
+          title: 'Erro ao excluir',
+          description: 'Não é possível deletar paciente com agendamentos futuros',
+          variant: 'destructive',
+        })
+        return
+      }
+
+      if (!confirm('Deseja realmente excluir este paciente?')) return
+
+      await deletePaciente(p.id)
       toast({ title: 'Paciente excluído com sucesso' })
     } catch (e: any) {
       toast({ title: 'Erro ao excluir', description: e.message, variant: 'destructive' })
@@ -141,7 +155,7 @@ export default function Pacientes() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleDelete(p.id)}
+                          onClick={() => handleDelete(p)}
                           className="h-8 w-8 text-red-600 bg-red-50"
                         >
                           <Trash className="w-4 h-4" />
@@ -218,7 +232,7 @@ export default function Pacientes() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleDelete(p.id)}
+                          onClick={() => handleDelete(p)}
                           className="text-destructive hover:bg-destructive/10"
                         >
                           <Trash className="w-4 h-4" />
