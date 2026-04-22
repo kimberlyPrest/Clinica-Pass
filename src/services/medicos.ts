@@ -12,3 +12,7 @@ export interface Medico {
 }
 
 export const getMedicos = () => pb.collection('medicos').getFullList<Medico>()
+export const getMedico = (id: string) => pb.collection('medicos').getOne<Medico>(id)
+export const createMedico = (data: Partial<Medico>) => pb.collection('medicos').create<Medico>(data)
+export const updateMedico = (id: string, data: Partial<Medico>) =>
+  pb.collection('medicos').update<Medico>(id, data)

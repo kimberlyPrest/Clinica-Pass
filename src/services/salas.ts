@@ -10,3 +10,6 @@ export interface Sala {
 }
 
 export const getSalas = () => pb.collection('salas').getFullList<Sala>()
+export const createSala = (data: Partial<Sala>) => pb.collection('salas').create<Sala>(data)
+export const updateSala = (id: string, data: Partial<Sala>) =>
+  pb.collection('salas').update<Sala>(id, data)
