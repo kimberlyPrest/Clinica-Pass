@@ -19,11 +19,19 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
-import { format, addHours, startOfDay } from 'date-fns'
+import { format, addHours, startOfDay, addMinutes } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import pb from '@/lib/pocketbase/client'
-import { verificarHorarioBloqueado } from '@/services/bloqueios'
-import { Plus, Trash, CheckCircle, Calendar as CalendarIcon } from 'lucide-react'
+import {
+  verificarHorarioBloqueadoSync,
+  getBloqueios,
+  isDateFullyBlocked,
+  type Bloqueio,
+} from '@/services/bloqueios'
+import { Plus, Trash, CheckCircle, Calendar as CalendarIcon, Clock } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { cn } from '@/lib/utils'
 
 interface Props {
   open: boolean
@@ -32,6 +40,12 @@ interface Props {
   onSaved: () => void
   onOpenAgendamento: (reservaId: string) => void
 }
+
+const hours = Array.from({ length: 16 }, (_, i) => i + 7)
+const timeOptions = hours.flatMap((h) => [
+  `${String(h).padStart(2, '0')}:00`,
+  `${String(h).padStart(2, '0')}:30`,
+])
 
 export function MedicoBookingModal({
   open,
@@ -49,6 +63,8 @@ export function MedicoBookingModal({
   const [salas, setSalas] = useState<any[]>([])
   const [slots, setSlots] = useState<any[]>([])
   const [savedReservas, setSavedReservas] = useState<any[]>([])
+  const [bloqueios, setBloqueios] = useState<Bloqueio[]>([])
+  const [timeOpen, setTimeOpen] = useState(false)
 
   useEffect(() => {
     if (open) {
@@ -59,6 +75,7 @@ export function MedicoBookingModal({
         .getFullList({ filter: "status='ativa'" })
         .then(setSalas)
         .catch(() => {})
+      getBloqueios().then(setBloqueios).catch(console.error)
     }
   }, [open])
 
@@ -85,19 +102,18 @@ export function MedicoBookingModal({
         return
       }
 
-      const bloqueios = await pb.collection('bloqueios').getFullList()
-      const blocked = await verificarHorarioBloqueado(
+      const blocked = verificarHorarioBloqueadoSync(
         salaId,
         start,
         format(start, 'HH:mm'),
         format(end, 'HH:mm'),
-        bloqueios as any,
+        bloqueios,
       )
 
       if (blocked) {
         toast({
           title: 'Sala bloqueada',
-          description: 'A sala selecionada possui um bloqueio para este horário.',
+          description: 'Este horário está bloqueado. Escolha outro.',
           variant: 'destructive',
         })
         return
@@ -152,29 +168,40 @@ export function MedicoBookingModal({
         {step === 'select' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
             <div className="space-y-3">
-              <Label className="text-base">Escolha a Data</Label>
-              <div className="border rounded-xl p-3 bg-card shadow-sm flex justify-center">
+              <Label className="text-base">Escolha a Sala e Data</Label>
+              <Select value={salaId} onValueChange={setSalaId}>
+                <SelectTrigger className="bg-muted/50 mb-4">
+                  <SelectValue placeholder="Selecione a sala primeiro" />
+                </SelectTrigger>
+                <SelectContent>
+                  {salas.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <div
+                className={cn(
+                  'border rounded-xl p-3 bg-card shadow-sm flex justify-center transition-opacity',
+                  !salaId && 'opacity-50 pointer-events-none',
+                )}
+              >
                 <Calendar
                   mode="single"
                   selected={date}
                   onSelect={setDate}
                   locale={ptBR}
-                  disabled={(d) => d < startOfDay(new Date())}
+                  disabled={(d) =>
+                    d < startOfDay(new Date()) || isDateFullyBlocked(salaId, d, bloqueios)
+                  }
                   className="rounded-md"
                 />
               </div>
             </div>
-            <div className="space-y-5">
+            <div className="space-y-5 pt-2">
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Horário Inicial</Label>
-                  <Input
-                    type="time"
-                    value={time}
-                    onChange={(e) => setTime(e.target.value)}
-                    className="bg-muted/50"
-                  />
-                </div>
                 <div className="space-y-2">
                   <Label>Duração (horas)</Label>
                   <Input
@@ -185,26 +212,72 @@ export function MedicoBookingModal({
                     className="bg-muted/50"
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label>Horário Inicial</Label>
+                  <Popover open={timeOpen} onOpenChange={setTimeOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start font-normal bg-muted/50"
+                        disabled={!salaId || !date}
+                      >
+                        <Clock className="mr-2 h-4 w-4" />
+                        {time || 'Selecione'}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-64 p-2">
+                      <div className="grid grid-cols-4 gap-2 max-h-60 overflow-y-auto">
+                        {timeOptions.map((t) => {
+                          let isBlocked = false
+                          if (salaId && date) {
+                            const endCalc = addMinutes(
+                              new Date(`${format(date, 'yyyy-MM-dd')}T${t}`),
+                              duration * 60,
+                            )
+                            isBlocked = verificarHorarioBloqueadoSync(
+                              salaId,
+                              date,
+                              t,
+                              format(endCalc, 'HH:mm'),
+                              bloqueios,
+                            )
+                          }
+
+                          return (
+                            <Tooltip key={t}>
+                              <TooltipTrigger asChild>
+                                <div className={cn(isBlocked && 'cursor-not-allowed opacity-50')}>
+                                  <Button
+                                    variant={time === t ? 'default' : 'outline'}
+                                    className="w-full text-xs px-0"
+                                    disabled={isBlocked}
+                                    onClick={(e) => {
+                                      e.preventDefault()
+                                      setTimeOpen(false)
+                                      setTime(t)
+                                    }}
+                                  >
+                                    {t}
+                                  </Button>
+                                </div>
+                              </TooltipTrigger>
+                              {isBlocked && (
+                                <TooltipContent>Sala bloqueada neste horário</TooltipContent>
+                              )}
+                            </Tooltip>
+                          )
+                        })}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label>Sala</Label>
-                <Select value={salaId} onValueChange={setSalaId}>
-                  <SelectTrigger className="bg-muted/50">
-                    <SelectValue placeholder="Selecione a sala" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {salas.map((s) => (
-                      <SelectItem key={s.id} value={s.id}>
-                        {s.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleAddSlot}
+                disabled={!salaId || !date || !time}
                 className="w-full border-[#05807f] text-[#05807f] hover:bg-[#05807f]/10"
               >
                 <Plus className="w-4 h-4 mr-2" /> Adicionar à Lista

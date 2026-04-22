@@ -57,14 +57,13 @@ export function avaliarRecorrenciaComplexa(padrao: string, data: Date): boolean 
   return false
 }
 
-export async function verificarHorarioBloqueado(
+export function verificarHorarioBloqueadoSync(
   sala_id: string,
   data: Date,
   horaInicio: string,
   horaFim: string,
-  bloqueiosCached?: Bloqueio[],
-): Promise<boolean> {
-  const bloqueios = bloqueiosCached || (await getBloqueios())
+  bloqueios: Bloqueio[],
+): boolean {
   const year = data.getFullYear()
   const month = data.getMonth()
   const day = data.getDate()
@@ -128,5 +127,66 @@ export async function verificarHorarioBloqueado(
     }
   }
 
+  return false
+}
+
+export async function verificarHorarioBloqueado(
+  sala_id: string,
+  data: Date,
+  horaInicio: string,
+  horaFim: string,
+  bloqueiosCached?: Bloqueio[],
+): Promise<boolean> {
+  const bloqueios = bloqueiosCached || (await getBloqueios())
+  return verificarHorarioBloqueadoSync(sala_id, data, horaInicio, horaFim, bloqueios as any)
+}
+
+export function isDateFullyBlocked(sala_id: string, data: Date, bloqueios: Bloqueio[]): boolean {
+  const year = data.getFullYear()
+  const month = data.getMonth()
+  const day = data.getDate()
+  const realDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+  const diaDaSemanaMap = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab']
+
+  for (const b of bloqueios) {
+    if (b.sala_id !== sala_id) continue
+
+    let isDayApplicable = false
+    if (b.tipo === 'pontual' || b.tipo === 'periodo') {
+      if (b.data_inicio && b.data_fim) {
+        if (realDateStr >= b.data_inicio && realDateStr <= b.data_fim) isDayApplicable = true
+      } else if (b.data_inicio === realDateStr) {
+        isDayApplicable = true
+      }
+    } else if (b.tipo === 'diario') {
+      isDayApplicable = true
+    } else if (b.tipo === 'semanal') {
+      if (Array.isArray(b.dias_semana)) {
+        if (
+          b.dias_semana.includes(diaDaSemanaMap[data.getDay()]) ||
+          b.dias_semana.includes(String(data.getDay())) ||
+          b.dias_semana.includes(data.getDay() as any)
+        ) {
+          isDayApplicable = true
+        }
+      }
+    } else if (b.tipo === 'mensal') {
+      if (b.data_inicio) {
+        const bDay = parseInt(b.data_inicio.split('-')[2] || b.data_inicio, 10)
+        if (!isNaN(bDay) && bDay === day) isDayApplicable = true
+      }
+    } else if (b.tipo === 'recorrencia_complexa') {
+      if (b.data_inicio && avaliarRecorrenciaComplexa(b.data_inicio, data)) {
+        isDayApplicable = true
+      }
+    }
+
+    if (
+      isDayApplicable &&
+      (!b.hora_inicio || !b.hora_fim || (b.hora_inicio === '00:00' && b.hora_fim === '23:59'))
+    ) {
+      return true
+    }
+  }
   return false
 }

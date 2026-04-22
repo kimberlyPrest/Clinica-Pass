@@ -33,6 +33,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     try {
       await pb.collection('users').authWithPassword(email, password)
+      import('@/services/reservas').then(({ gerarReservasMensalistas }) => {
+        gerarReservasMensalistas().catch(console.error)
+      })
       return { error: null }
     } catch (error) {
       return { error }
