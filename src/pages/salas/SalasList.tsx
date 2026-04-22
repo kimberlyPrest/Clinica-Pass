@@ -36,7 +36,9 @@ export default function SalasList() {
       const [s, b] = await Promise.all([getSalas(), getBloqueios()])
       setSalas(s)
       setBloqueios(b)
-    } catch (e) {}
+    } catch (e) {
+      console.error('Failed to load data', e)
+    }
   }
 
   useEffect(() => {
