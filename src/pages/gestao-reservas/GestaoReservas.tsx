@@ -8,9 +8,13 @@ import { getSalas } from '@/services/salas'
 import { useRealtime } from '@/hooks/use-realtime'
 import { ReservaFiltros } from './components/ReservaFiltros'
 import { ReservaList } from './components/ReservaList'
-import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
 import { isSameDay, isThisWeek, isThisMonth } from 'date-fns'
+import {
+  PageWrapper,
+  PageHeader,
+  DSCard,
+  DSCardHeader,
+} from '@/components/ui/design-system'
 
 export default function GestaoReservas() {
   const { user } = useAuth()
@@ -41,16 +45,14 @@ export default function GestaoReservas() {
       setAgendamentos(agData)
       setMedicos(medData)
       setSalas(salData)
-    } catch (e) {
+    } catch {
       setError(true)
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => {
-    loadData()
-  }, [])
+  useEffect(() => { loadData() }, [])
   useRealtime('reservas', loadData)
   useRealtime('agendamentos', loadData)
 
@@ -82,44 +84,43 @@ export default function GestaoReservas() {
   }
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 animate-fade-in-up min-h-[calc(100vh-4rem)] bg-[#ffffff]">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-xl shadow-sm">
-        <div>
-          <h1 className="text-3xl font-display font-bold tracking-tight text-[#05807f]">
-            Reservas
-          </h1>
-          <p className="text-muted-foreground mt-1">Gerencie todas as reservas da clínica.</p>
+    <PageWrapper>
+      <PageHeader
+        title="Gestão de Reservas"
+        subtitle="Visualize e gerencie todas as reservas da clínica"
+      />
+
+      <DSCard padded={false}>
+        <DSCardHeader
+          title="Reservas"
+          subtitle={`${filteredReservas.length} reserva${filteredReservas.length !== 1 ? 's' : ''} encontrada${filteredReservas.length !== 1 ? 's' : ''}`}
+        />
+        <div className="p-6 space-y-6">
+          <ReservaFiltros
+            search={search}
+            setSearch={setSearch}
+            dateFilter={dateFilter}
+            setDateFilter={setDateFilter}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            medicoFilter={medicoFilter}
+            setMedicoFilter={setMedicoFilter}
+            salaFilter={salaFilter}
+            setSalaFilter={setSalaFilter}
+            medicos={medicos}
+            salas={salas}
+          />
+
+          <ReservaList
+            loading={loading}
+            error={error}
+            onRetry={loadData}
+            reservas={filteredReservas}
+            agendamentos={agendamentos}
+            salas={salas}
+          />
         </div>
-        <Button className="w-full md:w-auto bg-[#05807f] hover:bg-[#046666]">
-          <Plus className="w-4 h-4 mr-2" /> Nova Reserva
-        </Button>
-      </div>
-
-      <div className="bg-white p-6 rounded-xl shadow-sm space-y-6">
-        <ReservaFiltros
-          search={search}
-          setSearch={setSearch}
-          dateFilter={dateFilter}
-          setDateFilter={setDateFilter}
-          statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-          medicoFilter={medicoFilter}
-          setMedicoFilter={setMedicoFilter}
-          salaFilter={salaFilter}
-          setSalaFilter={setSalaFilter}
-          medicos={medicos}
-          salas={salas}
-        />
-
-        <ReservaList
-          loading={loading}
-          error={error}
-          onRetry={loadData}
-          reservas={filteredReservas}
-          agendamentos={agendamentos}
-          salas={salas}
-        />
-      </div>
-    </div>
+      </DSCard>
+    </PageWrapper>
   )
 }
