@@ -38,7 +38,8 @@ export default function Configuracoes() {
             <div>
               <h2 className="text-lg font-semibold">Permissões por Papel</h2>
               <p className="text-sm text-muted-foreground">
-                Defina quais recursos cada papel de usuário pode acessar. As alterações são salvas automaticamente.
+                Defina quais recursos cada papel de usuário pode acessar. As alterações são salvas
+                automaticamente.
               </p>
             </div>
             <PermissoesTable />

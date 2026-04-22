@@ -258,22 +258,33 @@ export default function Dashboard() {
             <CardContent>
               {medico.tipo === 'mensalista' ? (
                 <div className="space-y-3">
-                  <p className="text-sm text-muted-foreground font-medium">Grade de Horários Fixos:</p>
+                  <p className="text-sm text-muted-foreground font-medium">
+                    Grade de Horários Fixos:
+                  </p>
                   <div className="overflow-x-auto">
                     <div className="min-w-[280px]">
                       <div className="grid grid-cols-6 text-center text-xs font-medium text-muted-foreground pb-1 border-b">
                         <div></div>
-                        {DAYS.map((d) => <div key={d.id}>{d.label}</div>)}
+                        {DAYS.map((d) => (
+                          <div key={d.id}>{d.label}</div>
+                        ))}
                       </div>
                       <div className="max-h-[200px] overflow-y-auto">
                         {HOURS.map((hour) => (
-                          <div key={hour} className="grid grid-cols-6 text-center text-xs py-1 items-center border-b last:border-0">
+                          <div
+                            key={hour}
+                            className="grid grid-cols-6 text-center text-xs py-1 items-center border-b last:border-0"
+                          >
                             <div className="text-muted-foreground font-medium pr-1">{hour}</div>
                             {DAYS.map((day) => {
-                              const isSelected = (medico.horarios_fixos?.[day.id] || []).includes(hour)
+                              const isSelected = (medico.horarios_fixos?.[day.id] || []).includes(
+                                hour,
+                              )
                               return (
                                 <div key={`${day.id}-${hour}`} className="flex justify-center">
-                                  <div className={`w-3 h-3 rounded-full ${isSelected ? 'bg-primary' : 'bg-muted'}`} />
+                                  <div
+                                    className={`w-3 h-3 rounded-full ${isSelected ? 'bg-primary' : 'bg-muted'}`}
+                                  />
                                 </div>
                               )
                             })}
@@ -283,7 +294,11 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <div className="flex flex-col gap-2 pt-2">
-                    <Button variant="outline" size="sm" onClick={() => setMensalistaModalOpen(true)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setMensalistaModalOpen(true)}
+                    >
                       Cancelar Horário Fixo
                     </Button>
                     <Button size="sm" asChild>

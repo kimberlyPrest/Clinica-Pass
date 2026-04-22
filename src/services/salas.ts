@@ -31,11 +31,7 @@ export const deleteSala = async (id: string) => {
   return pb.collection('salas').delete(id)
 }
 
-export const getReservasPorSalaDoMes = async (
-  salaId: string,
-  monthStart: Date,
-  monthEnd: Date,
-) => {
+export const getReservasPorSalaDoMes = async (salaId: string, monthStart: Date, monthEnd: Date) => {
   return pb.collection('reservas').getFullList({
     filter: `sala_id = "${salaId}" && data_inicio >= "${monthStart.toISOString()}" && data_inicio <= "${monthEnd.toISOString()}" && status = "ativa"`,
     sort: 'data_inicio',

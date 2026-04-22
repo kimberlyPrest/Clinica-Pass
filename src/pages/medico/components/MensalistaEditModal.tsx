@@ -1,12 +1,7 @@
 import { useState } from 'react'
 import { format, addDays } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Switch } from '@/components/ui/switch'
@@ -64,7 +59,9 @@ export function MensalistaEditModal({ medico, open, onOpenChange }: Props) {
           hora_inicio: horariosDoDia[0] || '09:00',
           hora_fim: horariosDoDia[horariosDoDia.length - 1] || '19:00',
         })
-        toast({ title: `Bloqueio criado para ${format(selectedDate, "dd/MM/yyyy", { locale: ptBR })}.` })
+        toast({
+          title: `Bloqueio criado para ${format(selectedDate, 'dd/MM/yyyy', { locale: ptBR })}.`,
+        })
       }
       onOpenChange(false)
     } catch (e: any) {
@@ -83,7 +80,9 @@ export function MensalistaEditModal({ medico, open, onOpenChange }: Props) {
 
         <div className="space-y-4">
           <div>
-            <p className="text-sm text-muted-foreground mb-3">Selecione a data que deseja cancelar:</p>
+            <p className="text-sm text-muted-foreground mb-3">
+              Selecione a data que deseja cancelar:
+            </p>
             <Calendar
               mode="single"
               selected={selectedDate}
@@ -102,7 +101,9 @@ export function MensalistaEditModal({ medico, open, onOpenChange }: Props) {
               {horariosDoDia.length > 0 ? (
                 <div className="flex flex-wrap gap-1">
                   {horariosDoDia.map((h) => (
-                    <Badge key={h} variant="secondary">{h}</Badge>
+                    <Badge key={h} variant="secondary">
+                      {h}
+                    </Badge>
                   ))}
                 </div>
               ) : (
@@ -112,13 +113,13 @@ export function MensalistaEditModal({ medico, open, onOpenChange }: Props) {
           )}
 
           <div className="flex items-center gap-3 p-3 border rounded-lg">
-            <Switch
-              checked={cancelAll}
-              onCheckedChange={setCancelAll}
-              id="cancel-all"
-            />
+            <Switch checked={cancelAll} onCheckedChange={setCancelAll} id="cancel-all" />
             <Label htmlFor="cancel-all" className="cursor-pointer">
-              Cancelar <strong>todos os {selectedDate ? format(selectedDate, 'EEEE', { locale: ptBR }) : 'dias'}s</strong> recorrentes
+              Cancelar{' '}
+              <strong>
+                todos os {selectedDate ? format(selectedDate, 'EEEE', { locale: ptBR }) : 'dias'}s
+              </strong>{' '}
+              recorrentes
             </Label>
           </div>
 

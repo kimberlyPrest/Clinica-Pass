@@ -121,7 +121,11 @@ export function AgendamentoEditForm({ agendamento, onSuccess, onCancel, setIsDir
           })
           onSuccess()
         }
-        setOverflowDialog({ open: true, minutosExcedidos: check.minutosExcedidos, pendingFn: doUpdate })
+        setOverflowDialog({
+          open: true,
+          minutosExcedidos: check.minutosExcedidos,
+          pendingFn: doUpdate,
+        })
         return
       }
     }
@@ -149,111 +153,111 @@ export function AgendamentoEditForm({ agendamento, onSuccess, onCancel, setIsDir
 
   return (
     <>
-    <div className="space-y-4 py-2">
-      <div className="bg-muted/20 p-3 rounded-lg border">
-        <div className="text-xs text-muted-foreground uppercase">Paciente (Apenas Leitura)</div>
-        <div className="font-medium">{agendamento.paciente_nome}</div>
-      </div>
-      <div className="space-y-1">
-        <Label>
-          Telefone <span className="text-red-500">*</span>
-        </Label>
-        <Input
-          value={telefone}
-          onChange={(e) => handleChange(setTelefone)(formatPhone(e.target.value))}
-          className={errors.telefone ? 'border-red-500' : ''}
-        />
-        {errors.telefone && <div className="text-xs text-red-500">{errors.telefone}</div>}
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <Label>
-            Data <span className="text-red-500">*</span>
-          </Label>
-          <Input
-            type="date"
-            value={data}
-            onChange={(e) => handleChange(setData)(e.target.value)}
-            className={errors.data ? 'border-red-500' : ''}
-          />
-          {errors.data && <div className="text-xs text-red-500">{errors.data}</div>}
+      <div className="space-y-4 py-2">
+        <div className="bg-muted/20 p-3 rounded-lg border">
+          <div className="text-xs text-muted-foreground uppercase">Paciente (Apenas Leitura)</div>
+          <div className="font-medium">{agendamento.paciente_nome}</div>
         </div>
         <div className="space-y-1">
           <Label>
-            Hora Início <span className="text-red-500">*</span>
+            Telefone <span className="text-red-500">*</span>
           </Label>
           <Input
-            type="time"
-            value={horaInicio}
-            onChange={(e) => handleChange(setHoraInicio)(e.target.value)}
-            className={errors.horaInicio ? 'border-red-500' : ''}
+            value={telefone}
+            onChange={(e) => handleChange(setTelefone)(formatPhone(e.target.value))}
+            className={errors.telefone ? 'border-red-500' : ''}
           />
-          {errors.horaInicio && <div className="text-xs text-red-500">{errors.horaInicio}</div>}
+          {errors.telefone && <div className="text-xs text-red-500">{errors.telefone}</div>}
         </div>
-        <div className="space-y-1">
-          <Label>
-            Duração (horas) <span className="text-red-500">*</span>
-          </Label>
-          <Input
-            type="number"
-            min="1"
-            step="0.5"
-            value={duracao}
-            onChange={(e) => handleChange(setDuracao)(e.target.value)}
-            className={errors.duracao ? 'border-red-500' : ''}
-          />
-          {errors.duracao && <div className="text-xs text-red-500">{errors.duracao}</div>}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <Label>
+              Data <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              type="date"
+              value={data}
+              onChange={(e) => handleChange(setData)(e.target.value)}
+              className={errors.data ? 'border-red-500' : ''}
+            />
+            {errors.data && <div className="text-xs text-red-500">{errors.data}</div>}
+          </div>
+          <div className="space-y-1">
+            <Label>
+              Hora Início <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              type="time"
+              value={horaInicio}
+              onChange={(e) => handleChange(setHoraInicio)(e.target.value)}
+              className={errors.horaInicio ? 'border-red-500' : ''}
+            />
+            {errors.horaInicio && <div className="text-xs text-red-500">{errors.horaInicio}</div>}
+          </div>
+          <div className="space-y-1">
+            <Label>
+              Duração (horas) <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              type="number"
+              min="1"
+              step="0.5"
+              value={duracao}
+              onChange={(e) => handleChange(setDuracao)(e.target.value)}
+              className={errors.duracao ? 'border-red-500' : ''}
+            />
+            {errors.duracao && <div className="text-xs text-red-500">{errors.duracao}</div>}
+          </div>
+          <div className="space-y-1">
+            <Label>Status</Label>
+            <Select value={status} onValueChange={handleChange(setStatus)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pendente">Pendente</SelectItem>
+                <SelectItem value="confirmado">Confirmado</SelectItem>
+                <SelectItem value="realizado">Realizado</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-        <div className="space-y-1">
-          <Label>Status</Label>
-          <Select value={status} onValueChange={handleChange(setStatus)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="pendente">Pendente</SelectItem>
-              <SelectItem value="confirmado">Confirmado</SelectItem>
-              <SelectItem value="realizado">Realizado</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="flex gap-2 justify-end pt-4 border-t">
+          <Button variant="outline" onClick={onCancel}>
+            Cancelar
+          </Button>
+          <Button className="bg-[#05807f] text-white" onClick={handleSave}>
+            Salvar Alterações
+          </Button>
         </div>
       </div>
-      <div className="flex gap-2 justify-end pt-4 border-t">
-        <Button variant="outline" onClick={onCancel}>
-          Cancelar
-        </Button>
-        <Button className="bg-[#05807f] text-white" onClick={handleSave}>
-          Salvar Alterações
-        </Button>
-      </div>
-    </div>
 
-    <AlertDialog
-      open={overflowDialog.open}
-      onOpenChange={(open) => setOverflowDialog((p) => ({ ...p, open }))}
-    >
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Tempo da Reserva Excedido</AlertDialogTitle>
-          <AlertDialogDescription>
-            Esta consulta ultrapassa o tempo reservado em{' '}
-            <strong>{overflowDialog.minutosExcedidos} minutos</strong>. O que deseja fazer?
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter className="flex-col gap-2 sm:flex-row">
-          <AlertDialogCancel>Ajustar Duração</AlertDialogCancel>
-          <AlertDialogAction
-            className="bg-[#05807f] hover:bg-[#05807f]/90"
-            onClick={async () => {
-              if (overflowDialog.pendingFn) await overflowDialog.pendingFn()
-              setOverflowDialog((p) => ({ ...p, open: false }))
-            }}
-          >
-            Salvar Mesmo Assim
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+      <AlertDialog
+        open={overflowDialog.open}
+        onOpenChange={(open) => setOverflowDialog((p) => ({ ...p, open }))}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Tempo da Reserva Excedido</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta consulta ultrapassa o tempo reservado em{' '}
+              <strong>{overflowDialog.minutosExcedidos} minutos</strong>. O que deseja fazer?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col gap-2 sm:flex-row">
+            <AlertDialogCancel>Ajustar Duração</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-[#05807f] hover:bg-[#05807f]/90"
+              onClick={async () => {
+                if (overflowDialog.pendingFn) await overflowDialog.pendingFn()
+                setOverflowDialog((p) => ({ ...p, open: false }))
+              }}
+            >
+              Salvar Mesmo Assim
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

@@ -12,7 +12,15 @@ import {
   subMonths,
   addMonths,
 } from 'date-fns'
-import { ArrowLeft, Edit, Clock, Users, CalendarRange, ChevronLeft, ChevronRight } from 'lucide-react'
+import {
+  ArrowLeft,
+  Edit,
+  Clock,
+  Users,
+  CalendarRange,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react'
 import { getMedico, type Medico } from '@/services/medicos'
 import { getAgendamentosPorMedico } from '@/services/reservas'
 import { useAuth } from '@/hooks/use-auth'

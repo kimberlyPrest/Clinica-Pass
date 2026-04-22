@@ -17,11 +17,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar'
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import {
   LayoutDashboard,
   Stethoscope,
@@ -162,7 +158,12 @@ function LayoutContent() {
                             'group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center',
                           )}
                         >
-                          <item.icon className={cn('w-5 h-5 shrink-0', isActive ? 'text-white' : 'text-muted-foreground')} />
+                          <item.icon
+                            className={cn(
+                              'w-5 h-5 shrink-0',
+                              isActive ? 'text-white' : 'text-muted-foreground',
+                            )}
+                          />
                           <span className="truncate group-data-[collapsible=icon]:hidden flex-1">
                             {item.label}
                           </span>

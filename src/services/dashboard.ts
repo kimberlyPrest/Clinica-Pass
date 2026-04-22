@@ -147,10 +147,7 @@ export async function getDashboardLineChart(): Promise<LineChartPoint[]> {
     const reservedMinutes = reservas.reduce((acc: number, r: any) => {
       return acc + reservaOverlapWithDay(r, day)
     }, 0)
-    const occupancy = Math.min(
-      100,
-      Math.round((reservedMinutes / totalSalaMinutesPerDay) * 100),
-    )
+    const occupancy = Math.min(100, Math.round((reservedMinutes / totalSalaMinutesPerDay) * 100))
     return { day: format(day, 'dd'), occupancy }
   })
 }
@@ -168,7 +165,10 @@ export async function getDashboardPieChart(): Promise<PieChartPoint[]> {
   const byRoom: Record<string, number> = {}
   for (const r of reservas) {
     const salaNome = (r as any).expand?.sala_id?.nome || 'Sem Sala'
-    const minutes = differenceInMinutes(parseISO(r.data_fim as string), parseISO(r.data_inicio as string))
+    const minutes = differenceInMinutes(
+      parseISO(r.data_fim as string),
+      parseISO(r.data_inicio as string),
+    )
     byRoom[salaNome] = (byRoom[salaNome] || 0) + minutes
   }
 
@@ -200,7 +200,11 @@ export async function getDashboardAppointments(): Promise<DashboardAppointment[]
     const horaInicio = parseISO(a.hora_inicio)
     const dateStr = format(horaInicio, 'yyyy-MM-dd')
     const dateLabel =
-      dateStr === todayStr ? 'Hoje' : dateStr === tomorrowStr ? 'Amanhã' : format(horaInicio, 'dd/MM')
+      dateStr === todayStr
+        ? 'Hoje'
+        : dateStr === tomorrowStr
+          ? 'Amanhã'
+          : format(horaInicio, 'dd/MM')
 
     return {
       id: a.id,

@@ -76,9 +76,7 @@ export default function Index() {
       const [line, pie] = await Promise.all([getDashboardLineChart(), getDashboardPieChart()])
       setLineChartData(line)
       const filteredPie =
-        filters.rooms.length > 0
-          ? pie.filter((p) => filters.rooms.includes(p.name))
-          : pie
+        filters.rooms.length > 0 ? pie.filter((p) => filters.rooms.includes(p.name)) : pie
       setPieChartData(filteredPie)
     } catch {
       // silently fail
@@ -182,11 +180,7 @@ export default function Index() {
         <section className="space-y-8">
           <KpiGrid data={kpiData} loading={kpiLoading} />
 
-          <ChartsSection
-            lineData={lineChartData}
-            pieData={pieChartData}
-            loading={chartsLoading}
-          />
+          <ChartsSection lineData={lineChartData} pieData={pieChartData} loading={chartsLoading} />
 
           <div
             className="space-y-4 animate-fade-in-up bg-card p-6 rounded-2xl shadow-sm border border-border/50"
@@ -209,11 +203,7 @@ export default function Index() {
                 ATUALIZAR
               </Button>
             </div>
-            <AppointmentsTable
-              data={appointments}
-              status={tableStatus}
-              onRetry={handleRetry}
-            />
+            <AppointmentsTable data={appointments} status={tableStatus} onRetry={handleRetry} />
           </div>
         </section>
       </div>

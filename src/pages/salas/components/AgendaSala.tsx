@@ -138,8 +138,7 @@ export function AgendaSala({ open, onOpenChange, sala }: Props) {
             <div className="flex items-center justify-between">
               <DialogTitle className="text-xl flex items-center gap-2">
                 <CalendarIcon className="w-5 h-5 text-primary" />
-                Agenda:{' '}
-                <span className="text-primary">{sala.nome}</span>
+                Agenda: <span className="text-primary">{sala.nome}</span>
               </DialogTitle>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => setWeekOffset(0)}>
@@ -232,23 +231,26 @@ export function AgendaSala({ open, onOpenChange, sala }: Props) {
                           )}
 
                           {/* Render reservation label at the first occupied cell */}
-                          {occupied && block && (() => {
-                            const rStart = parseISO(block.data_inicio)
-                            const cellHourStart = new Date(dayDate)
-                            cellHourStart.setHours(h, 0, 0, 0)
-                            const prevHourStart = new Date(dayDate)
-                            prevHourStart.setHours(h - 1, 59, 59, 999)
-                            const isFirst = rStart > prevHourStart
-                            if (!isFirst) return null
-                            return (
-                              <div className="absolute inset-1 bg-primary/20 text-primary border border-primary/30 rounded p-1 text-[10px] font-semibold overflow-hidden shadow-sm pointer-events-none">
-                                <div className="truncate">{block.medicoNome}</div>
-                                <div className="opacity-70">
-                                  {format(parseISO(block.data_inicio), 'HH:mm')}–{format(parseISO(block.data_fim), 'HH:mm')}
+                          {occupied &&
+                            block &&
+                            (() => {
+                              const rStart = parseISO(block.data_inicio)
+                              const cellHourStart = new Date(dayDate)
+                              cellHourStart.setHours(h, 0, 0, 0)
+                              const prevHourStart = new Date(dayDate)
+                              prevHourStart.setHours(h - 1, 59, 59, 999)
+                              const isFirst = rStart > prevHourStart
+                              if (!isFirst) return null
+                              return (
+                                <div className="absolute inset-1 bg-primary/20 text-primary border border-primary/30 rounded p-1 text-[10px] font-semibold overflow-hidden shadow-sm pointer-events-none">
+                                  <div className="truncate">{block.medicoNome}</div>
+                                  <div className="opacity-70">
+                                    {format(parseISO(block.data_inicio), 'HH:mm')}–
+                                    {format(parseISO(block.data_fim), 'HH:mm')}
+                                  </div>
                                 </div>
-                              </div>
-                            )
-                          })()}
+                              )
+                            })()}
                         </div>
                       )
                     })}
@@ -270,7 +272,9 @@ export function AgendaSala({ open, onOpenChange, sala }: Props) {
           fetchReservas()
         }}
         initialDate={selectedSlot?.date}
-        initialTime={selectedSlot ? `${selectedSlot.hour.toString().padStart(2, '0')}:00` : undefined}
+        initialTime={
+          selectedSlot ? `${selectedSlot.hour.toString().padStart(2, '0')}:00` : undefined
+        }
         initialSalaId={sala.id}
       />
     </>

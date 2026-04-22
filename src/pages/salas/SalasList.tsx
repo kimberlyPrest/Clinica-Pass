@@ -1,6 +1,11 @@
 import { useState, useEffect, useMemo } from 'react'
 import { startOfMonth, endOfMonth, differenceInMinutes, parseISO, format } from 'date-fns'
-import { getSalas, getTodasReservasdoMes, getProximaReservaDaSala, type Sala } from '@/services/salas'
+import {
+  getSalas,
+  getTodasReservasdoMes,
+  getProximaReservaDaSala,
+  type Sala,
+} from '@/services/salas'
 import { getBloqueios, type Bloqueio } from '@/services/bloqueios'
 import { useRealtime } from '@/hooks/use-realtime'
 import { Button } from '@/components/ui/button'
