@@ -1,4 +1,5 @@
 import pb from '@/lib/pocketbase/client'
+import { verificarHorarioBloqueado } from '@/services/bloqueios'
 
 export const getAgendamentosPorMedico = async (medicoId: string) => {
   return pb.collection('agendamentos').getFullList({
@@ -59,10 +60,6 @@ export const gerarReservasMensalistas = async () => {
 
   const bloqueios = await pb.collection('bloqueios').getFullList()
 
-  const checkOverlap = (aStart: Date, aEnd: Date, bStart: Date, bEnd: Date) => {
-    return aStart < bEnd && aEnd > bStart
-  }
-
   for (const medico of medicos) {
     if (!medico.horarios_fixos) continue
 
@@ -102,37 +99,13 @@ export const gerarReservasMensalistas = async () => {
 
           if (isDuplicate) continue
 
-          const realDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-
-          const isBlocked = bloqueios.some((b) => {
-            if (b.sala_id !== sala_id) return false
-            let isDayApplicable = false
-            if (b.tipo === 'pontual' || b.tipo === 'periodo') {
-              if (b.data_inicio && b.data_fim) {
-                if (realDateStr >= b.data_inicio && realDateStr <= b.data_fim)
-                  isDayApplicable = true
-              } else if (b.data_inicio === realDateStr) {
-                isDayApplicable = true
-              }
-            } else if (b.tipo === 'diario') {
-              isDayApplicable = true
-            } else if (b.tipo === 'semanal') {
-              if (Array.isArray(b.dias_semana) && b.dias_semana.includes(date.getDay())) {
-                isDayApplicable = true
-              }
-            }
-
-            if (!isDayApplicable) return false
-
-            if (b.hora_inicio && b.hora_fim) {
-              const [bhIni, bmIni] = b.hora_inicio.split(':').map(Number)
-              const [bhFim, bmFim] = b.hora_fim.split(':').map(Number)
-              const bStart = new Date(year, month, day, bhIni, bmIni, 0)
-              const bEnd = new Date(year, month, day, bhFim, bmFim, 0)
-              return checkOverlap(resStart, resEnd, bStart, bEnd)
-            }
-            return true
-          })
+          const isBlocked = await verificarHorarioBloqueado(
+            sala_id,
+            date,
+            hor.inicio,
+            hor.fim,
+            bloqueios as any,
+          )
 
           if (isBlocked) continue
 

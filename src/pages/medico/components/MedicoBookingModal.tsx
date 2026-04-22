@@ -22,6 +22,7 @@ import { useToast } from '@/hooks/use-toast'
 import { format, addHours, startOfDay } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import pb from '@/lib/pocketbase/client'
+import { verificarHorarioBloqueado } from '@/services/bloqueios'
 import { Plus, Trash, CheckCircle, Calendar as CalendarIcon } from 'lucide-react'
 
 interface Props {
@@ -83,6 +84,25 @@ export function MedicoBookingModal({
         })
         return
       }
+
+      const bloqueios = await pb.collection('bloqueios').getFullList()
+      const blocked = await verificarHorarioBloqueado(
+        salaId,
+        start,
+        format(start, 'HH:mm'),
+        format(end, 'HH:mm'),
+        bloqueios as any,
+      )
+
+      if (blocked) {
+        toast({
+          title: 'Sala bloqueada',
+          description: 'A sala selecionada possui um bloqueio para este horário.',
+          variant: 'destructive',
+        })
+        return
+      }
+
       const salaNome = salas.find((s) => s.id === salaId)?.nome
       setSlots([...slots, { date, time, duration, salaId, salaNome }])
       setSalaId('')

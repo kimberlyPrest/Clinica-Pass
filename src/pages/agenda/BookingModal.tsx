@@ -19,8 +19,8 @@ import { Label } from '@/components/ui/label'
 import type { Medico } from '@/services/medicos'
 import type { Sala } from '@/services/salas'
 import { createReserva, getReservas } from '@/services/reservas'
-import { getBloqueios } from '@/services/bloqueios'
-import { checkConflict, checkBlock } from '@/lib/businessRules'
+import { getBloqueios, verificarHorarioBloqueado } from '@/services/bloqueios'
+import { checkConflict } from '@/lib/businessRules'
 import { useToast } from '@/hooks/use-toast'
 import { format, addMinutes, parseISO } from 'date-fns'
 import { Plus, Trash } from 'lucide-react'
@@ -88,8 +88,36 @@ export default function BookingModal({
       })
       return
     }
-    setSlots([...slots, { date: currentDate, time: currentTime, duration, sala_id: salaId }])
-    setSalaId('')
+
+    getBloqueios()
+      .then(async (allBloqueios) => {
+        const start = new Date(`${currentDate}T${currentTime}`)
+        const endCalc = addMinutes(start, duration * 60)
+
+        const blocked = await verificarHorarioBloqueado(
+          salaId,
+          start,
+          format(start, 'HH:mm'),
+          format(endCalc, 'HH:mm'),
+          allBloqueios as any,
+        )
+
+        if (blocked) {
+          toast({
+            title: 'Sala bloqueada',
+            description: 'A sala selecionada está bloqueada para este horário.',
+            variant: 'destructive',
+          })
+          return
+        }
+
+        setSlots([...slots, { date: currentDate, time: currentTime, duration, sala_id: salaId }])
+        setSalaId('')
+      })
+      .catch(() => {
+        setSlots([...slots, { date: currentDate, time: currentTime, duration, sala_id: salaId }])
+        setSalaId('')
+      })
   }
 
   const handleSave = async () => {
@@ -105,7 +133,13 @@ export default function BookingModal({
         const endCalc = addMinutes(start, slot.duration * 60)
         const sala = salas.find((s) => s.id === slot.sala_id)
 
-        const blocked = checkBlock(start, endCalc, allBloqueios, slot.sala_id)
+        const blocked = await verificarHorarioBloqueado(
+          slot.sala_id,
+          start,
+          format(start, 'HH:mm'),
+          format(endCalc, 'HH:mm'),
+          allBloqueios as any,
+        )
         if (blocked) {
           throw new Error(`Sala ${sala?.nome} está bloqueada neste horário`)
         }
