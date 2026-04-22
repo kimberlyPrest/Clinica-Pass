@@ -24,7 +24,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { getMedicos, type Medico } from '@/services/medicos'
+import { getMedicos, getAllMedicos, type Medico } from '@/services/medicos'
 import { getSalas, type Sala } from '@/services/salas'
 import { getReservas, getAgendamentos, type Reserva, type Agendamento } from '@/services/agenda'
 import DayView from './DayView'
@@ -76,7 +76,7 @@ export default function Agenda() {
     const [res, ag, meds, sls] = await Promise.all([
       getReservas(start, end),
       getAgendamentos(start, end),
-      getMedicos(),
+      getAllMedicos(),
       getSalas(),
     ])
     setReservas(res)

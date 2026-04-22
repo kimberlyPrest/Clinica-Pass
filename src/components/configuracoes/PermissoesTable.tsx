@@ -106,8 +106,9 @@ function loadPermissions(): Resource[] {
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored) return JSON.parse(stored)
-  } catch {
-    // Fallback to default permissions if parsing fails
+  } catch (error) {
+    // Ignore JSON parse errors and return defaults
+  }
   }
   return DEFAULT_PERMISSIONS
 }
