@@ -33,7 +33,7 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!email || !password) {
-      setError('Campos obrigatórios')
+      setError('Campo obrigatório')
       return
     }
 
@@ -43,7 +43,11 @@ export default function Login() {
     const { error: err } = await signIn(email, password)
 
     if (err) {
-      setError('Email ou senha incorretos')
+      if (err.status === 0) setError('Erro de conexão. Verifique sua internet.')
+      else if (err.status === 400) setError('Email ou senha incorretos')
+      else if (err.message && err.message.includes('inactive'))
+        setError('Sua conta foi desativada. Contate o administrador.')
+      else setError('Erro ao salvar. Tente novamente.')
       setLoading(false)
     }
   }

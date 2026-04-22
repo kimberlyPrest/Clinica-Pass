@@ -18,9 +18,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import type { Medico } from '@/services/medicos'
 import type { Sala } from '@/services/salas'
-import { createReserva, getReservas } from '@/services/agenda'
+import { createReserva, getReservas } from '@/services/reservas'
+import { getBloqueios } from '@/services/bloqueios'
+import { checkConflict, checkBlock } from '@/lib/businessRules'
 import { useToast } from '@/hooks/use-toast'
-import { format, addHours } from 'date-fns'
+import { format, addMinutes, parseISO } from 'date-fns'
 import { Plus, Trash } from 'lucide-react'
 
 interface BookingModalProps {
@@ -53,10 +55,23 @@ export default function BookingModal({
   const [currentTime, setCurrentTime] = useState('09:00')
   const [duration, setDuration] = useState(1)
   const [salaId, setSalaId] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
 
   const handleAddSlot = () => {
     if (!currentDate || !currentTime || !salaId) {
-      toast({ title: 'Preencha todos os campos do horário', variant: 'destructive' })
+      toast({
+        title: 'Campo obrigatório',
+        description: 'Preencha todos os campos do horário',
+        variant: 'destructive',
+      })
+      return
+    }
+    if (duration < 1 || duration > 8) {
+      toast({
+        title: 'Duração inválida',
+        description: 'A duração deve ser entre 1 e 8 horas',
+        variant: 'destructive',
+      })
       return
     }
     setSlots([...slots, { date: currentDate, time: currentTime, duration, sala_id: salaId }])
@@ -65,25 +80,40 @@ export default function BookingModal({
 
   const handleSave = async () => {
     if (!medicoId || slots.length === 0) return
+    setIsSaving(true)
 
     try {
+      const allReservas = await getReservas()
+      const allBloqueios = await getBloqueios()
+
       for (const slot of slots) {
         const start = new Date(`${slot.date}T${slot.time}`)
-        const end = addHours(start, slot.duration)
+        const endCalc = addMinutes(start, slot.duration * 60)
+        const sala = salas.find((s) => s.id === slot.sala_id)
 
-        const conflict = await getReservas(start, end).then((res) =>
-          res.some((r) => r.sala_id === slot.sala_id && r.status === 'ativa'),
-        )
-        if (conflict)
+        const blocked = checkBlock(start, endCalc, allBloqueios, slot.sala_id)
+        if (blocked) {
+          throw new Error(`Sala ${sala?.nome} está bloqueada neste horário`)
+        }
+
+        const conflict = checkConflict(start, endCalc, allReservas, slot.sala_id)
+        if (conflict) {
           throw new Error(
-            `Conflito de horário na ${salas.find((s) => s.id === slot.sala_id)?.nome}`,
+            `Sala ${sala?.nome} já possui reserva de ${format(
+              parseISO(conflict.reserva.data_inicio),
+              'HH:mm',
+            )} a ${format(
+              parseISO(conflict.reserva.data_fim),
+              'HH:mm',
+            )} em ${format(parseISO(conflict.reserva.data_inicio), 'dd/MM/yyyy')}`,
           )
+        }
 
         await createReserva({
           medico_id: medicoId,
           sala_id: slot.sala_id,
           data_inicio: start.toISOString(),
-          data_fim: end.toISOString(),
+          data_fim: endCalc.toISOString(),
           status: 'ativa',
         })
       }
@@ -93,7 +123,17 @@ export default function BookingModal({
       setSlots([])
       setMedicoId('')
     } catch (e: any) {
-      toast({ title: 'Erro ao reservar', description: e.message, variant: 'destructive' })
+      if (e.message === 'Failed to fetch') {
+        toast({ title: 'Erro de conexão. Verifique sua internet.', variant: 'destructive' })
+      } else {
+        toast({
+          title: 'Erro ao salvar. Tente novamente.',
+          description: e.message,
+          variant: 'destructive',
+        })
+      }
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -145,6 +185,8 @@ export default function BookingModal({
                 <Input
                   type="number"
                   min={1}
+                  max={8}
+                  step={0.5}
                   value={duration}
                   onChange={(e) => setDuration(Number(e.target.value))}
                 />
@@ -204,10 +246,10 @@ export default function BookingModal({
           </Button>
           <Button
             onClick={handleSave}
-            disabled={!medicoId || slots.length === 0}
+            disabled={!medicoId || slots.length === 0 || isSaving}
             className="bg-[#05807f] hover:bg-[#05807f]/90 text-white"
           >
-            Confirmar Reserva
+            {isSaving ? 'Salvando...' : 'Confirmar Reserva'}
           </Button>
         </DialogFooter>
       </DialogContent>

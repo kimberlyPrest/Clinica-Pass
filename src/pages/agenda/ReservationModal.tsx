@@ -10,13 +10,29 @@ import {
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-import type { Reserva, Agendamento } from '@/services/agenda'
-import { createAgendamento, updateReserva } from '@/services/agenda'
+import { updateReserva } from '@/services/reservas'
+import { createAgendamento } from '@/services/agendamentos'
 import { format, parseISO, differenceInMinutes, addMinutes } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useToast } from '@/hooks/use-toast'
 import { Plus, User, Phone, AlertTriangle, CalendarX2 } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { agendamentoSchema, formatPhone } from '@/lib/validators'
+
+// We define simplified types locally since we don't have the full @/services/agenda types
+interface Reserva {
+  id: string
+  data_inicio: string
+  data_fim: string
+  expand?: { medico_id?: { nome: string }; sala_id?: { nome: string } }
+}
+interface Agendamento {
+  id: string
+  paciente_nome: string
+  paciente_telefone: string
+  hora_inicio: string
+  hora_fim: string
+}
 
 interface ReservationModalProps {
   open: boolean
@@ -33,7 +49,7 @@ export default function ReservationModal({
 }: ReservationModalProps) {
   const { toast } = useToast()
   const [isAddingMode, setIsAddingMode] = useState(false)
-  const [newPaciente, setNewPaciente] = useState({ nome: '', telefone: '', duration: 60 })
+  const [newPaciente, setNewPaciente] = useState({ nome: '', telefone: '', duration: 30 })
 
   const start = parseISO(reserva.data_inicio)
   const end = parseISO(reserva.data_fim)
@@ -46,8 +62,20 @@ export default function ReservationModal({
 
   const handleAddAgendamento = async () => {
     try {
+      agendamentoSchema.parse(newPaciente)
+
       const aStart = addMinutes(start, usedDuration)
       const aEnd = addMinutes(aStart, newPaciente.duration)
+
+      if (usedDuration + newPaciente.duration > totalDuration) {
+        toast({
+          title: `Soma de consultas (${(usedDuration + newPaciente.duration) / 60}h) excede duração da reserva (${
+            totalDuration / 60
+          }h). Aumente a reserva ou reduza consultas.`,
+          variant: 'destructive',
+        })
+        return
+      }
 
       await createAgendamento({
         reserva_id: reserva.id,
@@ -59,20 +87,48 @@ export default function ReservationModal({
       })
       toast({ title: 'Agendamento adicionado' })
       setIsAddingMode(false)
-      setNewPaciente({ nome: '', telefone: '', duration: 60 })
+      setNewPaciente({ nome: '', telefone: '', duration: 30 })
     } catch (e: any) {
-      toast({ title: 'Erro ao adicionar', description: e.message, variant: 'destructive' })
+      if (e.errors) {
+        toast({ title: e.errors[0].message, variant: 'destructive' })
+      } else if (e.message === 'Failed to fetch') {
+        toast({ title: 'Erro de conexão. Verifique sua internet.', variant: 'destructive' })
+      } else {
+        toast({
+          title: 'Erro ao salvar. Tente novamente.',
+          description: e.message,
+          variant: 'destructive',
+        })
+      }
     }
   }
 
   const handleCancel = async () => {
-    if (!confirm('Deseja realmente cancelar esta reserva?')) return
+    if (agendamentos.length > 0) {
+      const confirmMsg =
+        `Deseja realmente cancelar esta reserva?\nIsso afetará ${agendamentos.length} agendamento(s):\n` +
+        agendamentos
+          .map((a) => `- ${a.paciente_nome} (${format(parseISO(a.hora_inicio), 'HH:mm')})`)
+          .join('\n')
+      if (!confirm(confirmMsg)) return
+    } else {
+      if (!confirm('Deseja realmente cancelar esta reserva?')) return
+    }
+
     try {
       await updateReserva(reserva.id, { status: 'cancelada' })
       toast({ title: 'Reserva cancelada' })
       onOpenChange(false)
     } catch (e: any) {
-      toast({ title: 'Erro ao cancelar', description: e.message, variant: 'destructive' })
+      if (e.message === 'Failed to fetch') {
+        toast({ title: 'Erro de conexão. Verifique sua internet.', variant: 'destructive' })
+      } else {
+        toast({
+          title: 'Erro ao salvar. Tente novamente.',
+          description: e.message,
+          variant: 'destructive',
+        })
+      }
     }
   }
 
@@ -135,6 +191,7 @@ export default function ReservationModal({
                   <Input
                     value={newPaciente.nome}
                     onChange={(e) => setNewPaciente({ ...newPaciente, nome: e.target.value })}
+                    placeholder="Nome completo"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
@@ -142,7 +199,11 @@ export default function ReservationModal({
                     <Label>Telefone</Label>
                     <Input
                       value={newPaciente.telefone}
-                      onChange={(e) => setNewPaciente({ ...newPaciente, telefone: e.target.value })}
+                      onChange={(e) =>
+                        setNewPaciente({ ...newPaciente, telefone: formatPhone(e.target.value) })
+                      }
+                      placeholder="(11) 99999-9999"
+                      maxLength={15}
                     />
                   </div>
                   <div className="space-y-2">
@@ -150,6 +211,7 @@ export default function ReservationModal({
                     <Input
                       type="number"
                       value={newPaciente.duration}
+                      step={15}
                       onChange={(e) =>
                         setNewPaciente({ ...newPaciente, duration: Number(e.target.value) })
                       }
