@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-22T22:06:59.510Z",
+  "generatedAt": "2026-04-22T22:08:27.546Z",
   "collections": [
     {
       "name": "users",
@@ -29,29 +29,21 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         },
         {
           "name": "tipo_acesso",
           "type": "select",
           "required": false,
           "system": false,
-          "selectValues": [
-            "clinica",
-            "medico"
-          ]
+          "selectValues": ["clinica", "medico"]
         }
       ],
       "indexes": [
@@ -94,10 +86,7 @@
           "type": "select",
           "required": false,
           "system": false,
-          "selectValues": [
-            "mensalista",
-            "avulso"
-          ]
+          "selectValues": ["mensalista", "avulso"]
         },
         {
           "name": "email",
@@ -122,24 +111,17 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         }
       ],
-      "indexes": [
-        "CREATE UNIQUE INDEX idx_medicos_usuario ON medicos (usuario_id)"
-      ]
+      "indexes": ["CREATE UNIQUE INDEX idx_medicos_usuario ON medicos (usuario_id)"]
     },
     {
       "name": "salas",
@@ -163,10 +145,7 @@
           "type": "select",
           "required": false,
           "system": false,
-          "selectValues": [
-            "ativa",
-            "inativa"
-          ]
+          "selectValues": ["ativa", "inativa"]
         },
         {
           "name": "horario_inicio",
@@ -185,19 +164,14 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         },
         {
           "name": "dias_funcionamento",
@@ -250,29 +224,21 @@
           "type": "select",
           "required": false,
           "system": false,
-          "selectValues": [
-            "ativa",
-            "cancelada"
-          ]
+          "selectValues": ["ativa", "cancelada"]
         },
         {
           "name": "created",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         }
       ],
       "indexes": []
@@ -324,30 +290,21 @@
           "type": "select",
           "required": false,
           "system": false,
-          "selectValues": [
-            "confirmado",
-            "pendente",
-            "realizado"
-          ]
+          "selectValues": ["confirmado", "pendente", "realizado"]
         },
         {
           "name": "created",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         }
       ],
       "indexes": []
@@ -419,19 +376,14 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         }
       ],
       "indexes": []
@@ -513,19 +465,14 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         },
         {
           "name": "dados_customizados",
@@ -534,9 +481,7 @@
           "system": false
         }
       ],
-      "indexes": [
-        "CREATE INDEX idx_pacientes_medico ON pacientes (medico_id)"
-      ]
+      "indexes": ["CREATE INDEX idx_pacientes_medico ON pacientes (medico_id)"]
     },
     {
       "name": "medico_campos_customizados",
@@ -567,12 +512,7 @@
           "type": "select",
           "required": true,
           "system": false,
-          "selectValues": [
-            "text",
-            "textarea",
-            "date",
-            "number"
-          ]
+          "selectValues": ["text", "textarea", "date", "number"]
         },
         {
           "name": "ativo",
@@ -591,19 +531,14 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         }
       ],
       "indexes": []

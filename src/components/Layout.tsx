@@ -43,21 +43,29 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { SidebarGroup, SidebarGroupLabel, SidebarGroupContent } from '@/components/ui/sidebar'
+import { EditarHorariosFixosModal } from '@/pages/medico/components/EditarHorariosFixosModal'
 
 function LayoutContent() {
   const location = useLocation()
   const navigate = useNavigate()
   const { user, signOut } = useAuth()
   const { setOpen } = useSidebar()
-  const [medicoTipo, setMedicoTipo] = useState<string | null>(null)
+  const [medico, setMedico] = useState<any>(null)
+  const [editarHorariosOpen, setEditarHorariosOpen] = useState(false)
 
-  useEffect(() => {
+  const fetchMedico = () => {
     if (user?.id && user?.tipo_acesso === 'medico') {
       pb.collection('medicos')
-        .getFirstListItem(`usuario_id="${user.id}"`, { fields: 'id,tipo' })
-        .then((m) => setMedicoTipo(m.tipo))
+        .getFirstListItem(`usuario_id="${user.id}"`)
+        .then((m) => setMedico(m))
         .catch(() => {})
     }
+  }
+
+  useEffect(() => {
+    fetchMedico()
   }, [user?.id])
 
   useEffect(() => {
@@ -80,6 +88,40 @@ function LayoutContent() {
   }
 
   const isMedico = user?.tipo_acesso === 'medico'
+  const isMensalista = isMedico && medico?.tipo === 'mensalista'
+
+  const getHorariosSummary = () => {
+    if (!medico?.horarios_fixos) return 'Nenhum horário fixo'
+    const horarios = medico.horarios_fixos
+    const dayNames: Record<string, string> = {
+      monday: 'Seg',
+      tuesday: 'Ter',
+      wednesday: 'Qua',
+      thursday: 'Qui',
+      friday: 'Sex',
+      saturday: 'Sáb',
+      sunday: 'Dom',
+    }
+    const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+    const grouped: Record<string, string[]> = {}
+
+    for (const day of dayOrder) {
+      const slots = horarios[day]
+      if (slots && slots.length > 0) {
+        const start = slots[0]
+        const end = slots[slots.length - 1]
+        const key = `${start}-${end}`
+        if (!grouped[key]) grouped[key] = []
+        grouped[key].push(dayNames[day])
+      }
+    }
+
+    const parts = Object.entries(grouped).map(([time, days]) => {
+      return `${days.join('/')} ${time}`
+    })
+
+    return parts.length > 0 ? parts.join('; ') : 'Nenhum horário fixo'
+  }
 
   const clinicaNavItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
@@ -139,8 +181,7 @@ function LayoutContent() {
               const isActive =
                 location.pathname === item.path ||
                 (location.pathname.startsWith(item.path + '/') && item.path !== '/')
-              const isMensalistaReservas =
-                isMedico && medicoTipo === 'mensalista' && item.path === '/medico/reservas'
+              const isMensalistaReservas = isMensalista && item.path === '/medico/reservas'
 
               if (isMensalistaReservas) {
                 return (
@@ -221,6 +262,49 @@ function LayoutContent() {
               )
             })}
           </SidebarMenu>
+
+          {isMensalista && (
+            <SidebarGroup className="mt-auto px-6 group-data-[collapsible=icon]:px-2 group-data-[collapsible=icon]:hidden mb-4">
+              <SidebarGroupLabel className="px-0 text-xs font-semibold text-[#05807f] mb-1">
+                Meus Horários Fixos
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full h-auto py-2 flex flex-col items-start gap-1 justify-start px-3 bg-[#f0dfd5]/30 border-[#05807f]/20 hover:bg-[#f0dfd5]/50"
+                    >
+                      <span className="text-[11px] text-muted-foreground whitespace-normal text-left leading-tight">
+                        {getHorariosSummary()}
+                      </span>
+                      <span className="text-xs font-medium text-[#05807f] mt-1 flex items-center gap-1">
+                        Gerenciar <ChevronDown className="w-3 h-3" />
+                      </span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="w-[200px] border-[#bdc9c8]/50 shadow-elevation"
+                  >
+                    <DropdownMenuItem
+                      onClick={() => setEditarHorariosOpen(true)}
+                      className="cursor-pointer focus:!bg-[#f0dfd5]/50 focus:!text-[#05807f]"
+                    >
+                      <Clock className="mr-2 w-4 h-4 text-muted-foreground" /> Editar Horários
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => navigate('/medico/reservas')}
+                      className="cursor-pointer focus:!bg-[#f0dfd5]/50 focus:!text-[#05807f]"
+                    >
+                      <CalendarDays className="mr-2 w-4 h-4 text-muted-foreground" /> Reservar Mais
+                      Horários
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          )}
         </SidebarContent>
 
         <SidebarFooter className="h-[60px] p-0 border-t border-[#bdc9c8]/30">
@@ -320,6 +404,15 @@ function LayoutContent() {
           <Outlet />
         </div>
       </main>
+
+      {medico && (
+        <EditarHorariosFixosModal
+          open={editarHorariosOpen}
+          onOpenChange={setEditarHorariosOpen}
+          medico={medico}
+          onSuccess={fetchMedico}
+        />
+      )}
     </div>
   )
 }
