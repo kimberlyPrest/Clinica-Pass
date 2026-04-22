@@ -6,7 +6,14 @@ import { useRealtime } from '@/hooks/use-realtime'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { getMedicoByUserId, type Medico } from '@/services/medicos'
 import {
   getReservasMedicoPeriodo,
@@ -84,9 +91,14 @@ export default function Dashboard() {
               ) : (
                 <ul className="space-y-4">
                   {reservas.map((r) => (
-                    <li key={r.id} className="flex flex-col sm:flex-row justify-between gap-3 border-b pb-4 last:border-0 last:pb-0">
+                    <li
+                      key={r.id}
+                      className="flex flex-col sm:flex-row justify-between gap-3 border-b pb-4 last:border-0 last:pb-0"
+                    >
                       <div>
-                        <p className="font-semibold text-primary">Sala: {r.expand?.sala_id?.nome || 'N/A'}</p>
+                        <p className="font-semibold text-primary">
+                          Sala: {r.expand?.sala_id?.nome || 'N/A'}
+                        </p>
                         <p className="text-sm text-muted-foreground flex items-center gap-1">
                           <Clock className="w-4 h-4" />
                           {format(new Date(r.data_inicio), 'dd/MM/yyyy HH:mm')} -{' '}
@@ -94,7 +106,9 @@ export default function Dashboard() {
                         </p>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm">Editar / Cancelar</Button>
+                        <Button variant="outline" size="sm">
+                          Editar / Cancelar
+                        </Button>
                         <Button size="sm">Agendar Consulta</Button>
                       </div>
                     </li>
@@ -118,26 +132,36 @@ export default function Dashboard() {
                     Nenhuma consulta agendada nos próximos 7 dias
                   </p>
                   <Button asChild>
-                    <Link to="/medico/pacientes">Agendar Consulta</Button>
+                    <Link to="/medico/pacientes">Agendar Consulta</Link>
                   </Button>
                 </div>
               ) : (
                 <ul className="space-y-4">
                   {consultas.map((c) => (
-                    <li key={c.id} className="flex flex-col sm:flex-row justify-between gap-3 border-b pb-4 last:border-0 last:pb-0">
+                    <li
+                      key={c.id}
+                      className="flex flex-col sm:flex-row justify-between gap-3 border-b pb-4 last:border-0 last:pb-0"
+                    >
                       <div>
                         <p className="font-semibold">{c.paciente_nome}</p>
                         <p className="text-sm text-muted-foreground">
                           {format(new Date(c.hora_inicio), 'dd/MM/yyyy HH:mm')} | Sala:{' '}
                           {c.expand?.reserva_id?.expand?.sala_id?.nome}
                         </p>
-                        <Badge variant={c.status === 'confirmado' ? 'default' : 'secondary'} className="mt-1">
+                        <Badge
+                          variant={c.status === 'confirmado' ? 'default' : 'secondary'}
+                          className="mt-1"
+                        >
                           {c.status}
                         </Badge>
                       </div>
                       <div className="flex flex-col gap-2">
-                        <Button variant="outline" size="sm">Cancelar/Remarcar</Button>
-                        <Button variant="secondary" size="sm">Ver Detalhes</Button>
+                        <Button variant="outline" size="sm">
+                          Cancelar/Remarcar
+                        </Button>
+                        <Button variant="secondary" size="sm">
+                          Ver Detalhes
+                        </Button>
                       </div>
                     </li>
                   ))}
@@ -223,13 +247,17 @@ export default function Dashboard() {
                   <p className="text-sm text-muted-foreground">Horários Fixos:</p>
                   <div className="p-3 bg-muted rounded-md text-sm font-medium">
                     {medico.horarios_fixos ? (
-                      <pre className="whitespace-pre-wrap font-sans">{JSON.stringify(medico.horarios_fixos, null, 2)}</pre>
+                      <pre className="whitespace-pre-wrap font-sans">
+                        {JSON.stringify(medico.horarios_fixos, null, 2)}
+                      </pre>
                     ) : (
                       'Seg/Qua/Sex 09:00-12:00 e 14:00-18:00 (Exemplo)'
                     )}
                   </div>
                   <div className="flex flex-col gap-2 pt-2">
-                    <Button variant="outline" size="sm">Editar / Cancelar Fixos</Button>
+                    <Button variant="outline" size="sm">
+                      Editar / Cancelar Fixos
+                    </Button>
                     <Button size="sm">Reservar Mais Horários</Button>
                   </div>
                 </div>
@@ -248,13 +276,29 @@ export default function Dashboard() {
 
           <div className="grid gap-3">
             <Button size="lg" className="w-full justify-start h-14 text-base" asChild>
-              <Link to="/medico/reservas"><CalendarDays className="mr-3 h-5 w-5" /> Minhas Reservas</Link>
+              <Link to="/medico/reservas">
+                <CalendarDays className="mr-3 h-5 w-5" /> Minhas Reservas
+              </Link>
             </Button>
-            <Button size="lg" variant="secondary" className="w-full justify-start h-14 text-base" asChild>
-              <Link to="/medico/reservas"><DoorOpen className="mr-3 h-5 w-5" /> Reservar Sala Agora</Link>
+            <Button
+              size="lg"
+              variant="secondary"
+              className="w-full justify-start h-14 text-base"
+              asChild
+            >
+              <Link to="/medico/reservas">
+                <DoorOpen className="mr-3 h-5 w-5" /> Reservar Sala Agora
+              </Link>
             </Button>
-            <Button size="lg" variant="outline" className="w-full justify-start h-14 text-base bg-white" asChild>
-              <Link to="/medico/pacientes"><User className="mr-3 h-5 w-5" /> Registrar Pacientes</Link>
+            <Button
+              size="lg"
+              variant="outline"
+              className="w-full justify-start h-14 text-base bg-white"
+              asChild
+            >
+              <Link to="/medico/pacientes">
+                <User className="mr-3 h-5 w-5" /> Registrar Pacientes
+              </Link>
             </Button>
           </div>
         </div>
