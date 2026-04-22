@@ -5,7 +5,7 @@ import * as React from 'react'
 
 import type { ToastActionElement, ToastProps } from '@/components/ui/toast'
 
-const TOAST_LIMIT = 1
+const TOAST_LIMIT = 3
 const TOAST_REMOVE_DELAY = 1000000
 
 type ToasterToast = ToastProps & {
@@ -179,9 +179,35 @@ function useToast() {
     }
   }, [state])
 
+  const showToast = React.useCallback(
+    ({
+      type,
+      title,
+      description,
+    }: {
+      type: 'success' | 'error' | 'warning' | 'info'
+      title: string
+      description?: string
+    }) => {
+      let duration = 4000
+      if (type === 'error') duration = 6000
+      if (type === 'info') duration = 3000
+      if (type === 'warning') duration = 4000
+
+      return toast({
+        variant: type as any,
+        title,
+        description,
+        duration,
+      })
+    },
+    [],
+  )
+
   return {
     ...state,
     toast,
+    showToast,
     dismiss: (toastId?: string) => dispatch({ type: 'DISMISS_TOAST', toastId }),
   }
 }

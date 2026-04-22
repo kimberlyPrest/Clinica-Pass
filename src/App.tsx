@@ -5,6 +5,7 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import Index from './pages/Index'
 import NotFound from './pages/NotFound'
 import Layout from './components/Layout'
+import { ToastDemo } from './components/ToastDemo'
 import Login from './pages/Login'
 import ProtectedRoute from './components/ProtectedRoute'
 import MedicosList from './pages/medicos/MedicosList'
@@ -26,6 +27,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <ToastDemo />
         <Routes>
           <Route path="/login" element={<Login />} />
 
