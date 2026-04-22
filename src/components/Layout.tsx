@@ -170,7 +170,7 @@ function LayoutContent() {
             <img
               src={logoImg}
               alt="Espaço Integer"
-              className="max-h-[48px] w-auto object-contain transition-all duration-200 group-data-[collapsible=icon]:hidden"
+              className="max-h-[72px] w-auto object-contain transition-all duration-200 group-data-[collapsible=icon]:hidden"
             />
             <img
               src={logoImg}
