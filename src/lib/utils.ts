@@ -12,3 +12,11 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // Add any other utility functions here
+
+export function formatPhone(val: string) {
+  let v = val.replace(/\D/g, '')
+  v = v.slice(0, 11)
+  if (v.length > 2) v = `(${v.slice(0, 2)}) ${v.slice(2)}`
+  if (v.length > 10) v = `${v.slice(0, 10)}-${v.slice(10)}`
+  return v
+}

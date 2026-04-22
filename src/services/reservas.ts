@@ -8,6 +8,15 @@ export const getAgendamentosPorMedico = async (medicoId: string) => {
   })
 }
 
+export const getReservasPorMedicoAtivas = async (medicoId: string) => {
+  const hoje = new Date().toISOString().split('T')[0]
+  return pb.collection('reservas').getFullList({
+    filter: `medico_id = "${medicoId}" && status = "ativa" && data_inicio >= "${hoje}"`,
+    expand: 'sala_id',
+    sort: 'data_inicio',
+  })
+}
+
 export const getReservas = async () => {
   return pb.collection('reservas').getFullList({
     expand: 'medico_id,sala_id',

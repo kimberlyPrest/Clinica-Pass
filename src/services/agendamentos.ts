@@ -12,3 +12,15 @@ export const getAgendamentosPorReserva = async (reservaId: string) => {
     sort: 'hora_inicio',
   })
 }
+
+export const createAgendamento = async (data: any) => {
+  return pb.collection('agendamentos').create(data)
+}
+
+export const updateAgendamento = async (id: string, data: any) => {
+  return pb.collection('agendamentos').update(id, data)
+}
+
+export const deleteAgendamento = async (id: string) => {
+  return pb.collection('agendamentos').delete(id)
+}
