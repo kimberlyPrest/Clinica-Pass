@@ -15,10 +15,6 @@ import { isSameDay, isThisWeek, isThisMonth } from 'date-fns'
 export default function GestaoReservas() {
   const { user } = useAuth()
 
-  if (user?.tipo_acesso === 'medico') {
-    return <Navigate to="/medico/dashboard" replace />
-  }
-
   const [reservas, setReservas] = useState<any[]>([])
   const [agendamentos, setAgendamentos] = useState<any[]>([])
   const [medicos, setMedicos] = useState<any[]>([])
@@ -80,6 +76,10 @@ export default function GestaoReservas() {
 
     return true
   })
+
+  if (user?.tipo_acesso === 'medico') {
+    return <Navigate to="/medico/dashboard" replace />
+  }
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 animate-fade-in-up bg-[#f7e6dc] min-h-[calc(100vh-4rem)]">
