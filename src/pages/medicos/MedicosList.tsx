@@ -39,8 +39,8 @@ export default function MedicosList() {
     setError(false)
     try {
       const res = await getMedicos(page, debouncedSearch)
-      setMedicos(res.items)
-      setTotalItems(res.totalItems)
+      setMedicos(res.items || [])
+      setTotalItems(res.totalItems || 0)
     } catch (err) {
       setError(true)
     } finally {
@@ -105,7 +105,7 @@ export default function MedicosList() {
                 Tentar Novamente
               </Button>
             </div>
-          ) : medicos.length === 0 ? (
+          ) : !medicos || medicos.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground">
               <UserX className="mx-auto h-12 w-12 opacity-50 mb-4" />
               <p className="mb-4">Nenhum médico cadastrado ou encontrado.</p>
@@ -131,7 +131,7 @@ export default function MedicosList() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {medicos.map((m) => (
+                    {medicos?.map((m) => (
                       <TableRow key={m.id}>
                         <TableCell className="font-medium">
                           <Link to={`/medicos/${m.id}`} className="hover:underline text-[#05807f]">
@@ -175,7 +175,7 @@ export default function MedicosList() {
 
               {/* Mobile Cards */}
               <div className="grid grid-cols-1 gap-4 md:hidden">
-                {medicos.map((m) => (
+                {medicos?.map((m) => (
                   <div key={m.id} className="border p-4 rounded-lg space-y-3 relative">
                     <div className="flex justify-between items-start pr-8">
                       <div>
