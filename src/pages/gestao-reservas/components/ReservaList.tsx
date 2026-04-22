@@ -177,7 +177,7 @@ export function ReservaList({ loading, error, onRetry, reservas, agendamentos }:
                     <TableCell>
                       <Badge
                         variant={isAtiva ? 'default' : 'secondary'}
-                        className={isAtiva ? 'bg-[#05807f]' : ''}
+                        className="bg-[#f7e6dc] text-[#03807f] font-bold opacity-[1]"
                       >
                         {r.status}
                       </Badge>
