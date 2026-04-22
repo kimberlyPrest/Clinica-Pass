@@ -43,6 +43,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
+import logoImg from '@/assets/espaco-integer.pdf-70f5f.png'
 import { Button } from '@/components/ui/button'
 import { SidebarGroup, SidebarGroupLabel, SidebarGroupContent } from '@/components/ui/sidebar'
 import { EditarHorariosFixosModal } from '@/pages/medico/components/EditarHorariosFixosModal'
@@ -165,13 +166,17 @@ function LayoutContent() {
         className="border-[#bdc9c8] [&_[data-sidebar=sidebar]]:bg-[#f7f9fb] transition-all duration-200 ease-in-out z-20"
       >
         <SidebarHeader className="h-[80px] p-4 flex flex-col justify-center border-b border-[#bdc9c8]/30 overflow-hidden">
-          <div className="flex items-center gap-3 h-full w-full">
-            <div className="w-8 h-8 rounded-md bg-[#05807f] flex items-center justify-center shrink-0 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:h-10 transition-all duration-200">
-              <Stethoscope className="w-5 h-5 text-white group-data-[collapsible=icon]:w-6 group-data-[collapsible=icon]:h-6 transition-all" />
-            </div>
-            <h1 className="text-[20px] font-display font-bold text-[#05807f] truncate group-data-[collapsible=icon]:hidden transition-all duration-200">
-              ClinicPro
-            </h1>
+          <div className="flex items-center justify-center h-full w-full">
+            <img
+              src={logoImg}
+              alt="Espaço Integer"
+              className="max-h-[48px] w-auto object-contain transition-all duration-200 group-data-[collapsible=icon]:hidden"
+            />
+            <img
+              src={logoImg}
+              alt="Espaço Integer"
+              className="h-10 w-10 max-w-none object-cover object-left hidden group-data-[collapsible=icon]:block transition-all duration-200"
+            />
           </div>
         </SidebarHeader>
 
@@ -394,10 +399,7 @@ function LayoutContent() {
         <header className="h-16 border-b border-border/50 flex items-center px-4 md:hidden shrink-0 bg-card/80 backdrop-blur-md sticky top-0 z-10">
           <SidebarTrigger className="mr-3 text-muted-foreground hover:text-foreground" />
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-[#05807f] flex items-center justify-center">
-              <Stethoscope className="w-3.5 h-3.5 text-white" />
-            </div>
-            <h1 className="font-display font-bold text-lg text-[#05807f]">ClinicPro</h1>
+            <img src={logoImg} alt="Espaço Integer" className="h-8 w-auto object-contain" />
           </div>
         </header>
         <div className="flex-1 overflow-y-auto w-full max-w-[100vw]">
