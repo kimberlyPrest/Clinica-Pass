@@ -28,28 +28,61 @@ export function avaliarRecorrenciaComplexa(padrao: string, data: Date): boolean 
 
   const p = padrao.toLowerCase().trim()
 
-  if (p === '1º domingo de cada mês' || p === '1o domingo de cada mês') {
-    return dateObjDay === 0 && dateObjDate <= 7
+  const diasSemanaMap: Record<string, number> = {
+    domingo: 0,
+    segunda: 1,
+    'segunda-feira': 1,
+    terça: 2,
+    terca: 2,
+    'terça-feira': 2,
+    quarta: 3,
+    'quarta-feira': 3,
+    quinta: 4,
+    'quinta-feira': 4,
+    sexta: 5,
+    'sexta-feira': 5,
+    sábado: 6,
+    sabado: 6,
   }
-  if (p === '2º segunda de cada mês' || p === '2o segunda de cada mês') {
-    return dateObjDay === 1 && dateObjDate >= 8 && dateObjDate <= 14
-  }
-  if (p === '3º quarta de cada mês' || p === '3o quarta de cada mês') {
-    return dateObjDay === 3 && dateObjDate >= 15 && dateObjDate <= 21
-  }
-  if (
-    p === 'último sexta de cada mês' ||
-    p === 'ultimo sexta de cada mês' ||
-    p === 'última sexta de cada mês'
-  ) {
-    const lastDayOfMonth = new Date(year, month + 1, 0)
-    let lastFriday = lastDayOfMonth.getDate()
-    while (new Date(year, month, lastFriday).getDay() !== 5) {
-      lastFriday--
+
+  // "1º domingo de cada mês", "2a terça-feira de cada mes"
+  const nthDayMatch = p.match(/^(\d)[ºoa\.]?\s+(.+?)\s+de\s+cada\s+m[eê]s$/)
+  if (nthDayMatch) {
+    const n = parseInt(nthDayMatch[1], 10)
+    const diaStr = nthDayMatch[2]
+    const targetDay = diasSemanaMap[diaStr]
+    
+    if (targetDay !== undefined) {
+      const isTargetDay = dateObjDay === targetDay
+      const isNthWeek = dateObjDate >= (n - 1) * 7 + 1 && dateObjDate <= n * 7
+      return isTargetDay && isNthWeek
     }
-    return dateObjDay === 5 && dateObjDate === lastFriday
   }
-  if (p === 'penúltimo dia de cada mês' || p === 'penultimo dia de cada mês') {
+
+  // "último domingo de cada mês"
+  const lastDayMatch = p.match(/^(?:[úu]ltimo|[úu]ltima)\s+(.+?)\s+de\s+cada\s+m[eê]s$/)
+  if (lastDayMatch) {
+    const diaStr = lastDayMatch[1]
+    
+    if (diaStr === 'dia') {
+      const lastDayOfMonth = new Date(year, month + 1, 0).getDate()
+      return dateObjDate === lastDayOfMonth
+    }
+
+    const targetDay = diasSemanaMap[diaStr]
+    if (targetDay !== undefined) {
+      const lastDayOfMonth = new Date(year, month + 1, 0)
+      let lastDate = lastDayOfMonth.getDate()
+      while (new Date(year, month, lastDate).getDay() !== targetDay) {
+        lastDate--
+      }
+      return dateObjDay === targetDay && dateObjDate === lastDate
+    }
+  }
+
+  // "penúltimo dia de cada mês"
+  const penultimoDayMatch = p.match(/^pen[úu]ltimo\s+dia\s+de\s+cada\s+m[eê]s$/)
+  if (penultimoDayMatch) {
     const lastDayOfMonth = new Date(year, month + 1, 0).getDate()
     return dateObjDate === lastDayOfMonth - 1
   }

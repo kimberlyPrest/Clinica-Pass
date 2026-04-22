@@ -44,12 +44,13 @@ export function MedicoAgendamentoModal({
   const [reservas, setReservas] = useState<any[]>([])
   const [reservaId, setReservaId] = useState('')
   const [pacientes, setPacientes] = useState<
-    { nome: string; telefone: string; duration: number }[]
+    { nome: string; telefone: string; duration: number; status: string }[]
   >([])
 
   const [nome, setNome] = useState('')
   const [telefone, setTelefone] = useState('')
   const [duration, setDuration] = useState(60)
+  const [status, setStatus] = useState('confirmado')
   const [suggestions, setSuggestions] = useState<any[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
 
@@ -59,6 +60,7 @@ export function MedicoAgendamentoModal({
       setNome('')
       setTelefone('')
       setDuration(60)
+      setStatus('confirmado')
       const now = new Date().toISOString()
       pb.collection('reservas')
         .getFullList({
@@ -139,10 +141,11 @@ export function MedicoAgendamentoModal({
       })
       return
     }
-    setPacientes([...pacientes, { nome, telefone, duration }])
+    setPacientes([...pacientes, { nome, telefone, duration, status }])
     setNome('')
     setTelefone('')
     setDuration(60)
+    setStatus('confirmado')
   }
 
   const handleSave = async () => {
@@ -179,7 +182,7 @@ export function MedicoAgendamentoModal({
           paciente_telefone: p.telefone,
           hora_inicio: currentStart.toISOString(),
           hora_fim: end.toISOString(),
-          status: 'confirmado',
+          status: p.status,
         })
         currentStart = end
       }
@@ -279,6 +282,19 @@ export function MedicoAgendamentoModal({
                     className="bg-background"
                   />
                 </div>
+                <div className="md:col-span-2 space-y-2">
+                  <Label>Status</Label>
+                  <Select value={status} onValueChange={setStatus}>
+                    <SelectTrigger className="bg-background">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="confirmado">Confirmado</SelectItem>
+                      <SelectItem value="pendente">Pendente</SelectItem>
+                      <SelectItem value="realizado">Realizado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <Button
                 type="button"
@@ -319,7 +335,8 @@ export function MedicoAgendamentoModal({
                       </div>
                       <div className="text-muted-foreground text-sm flex items-center gap-2 mt-1">
                         <Phone className="w-3 h-3" /> {p.telefone} <span className="mx-1">•</span>{' '}
-                        {p.duration} min
+                        {p.duration} min <span className="mx-1">•</span>{' '}
+                        <span className="capitalize">{p.status}</span>
                       </div>
                     </div>
                     <Button

@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useToast } from '@/hooks/use-toast'
 import { createPaciente, updatePaciente, type Paciente } from '@/services/pacientes'
 import { useAuth } from '@/hooks/use-auth'
@@ -77,6 +78,7 @@ export function PacienteModal({ open, onOpenChange, medicoId, paciente, onSaved 
           Anamnese: paciente.anamnese || parsedCustomData['Anamnese'] || '',
           Medicações: paciente.medicacoes || parsedCustomData['Medicações'] || '',
           'Notas Internas': paciente.notas_internas || parsedCustomData['Notas Internas'] || '',
+          'Histórico de Retornos': parsedCustomData['Histórico de Retornos'] || '',
           ...parsedCustomData,
         })
       } else {
@@ -180,126 +182,145 @@ export function PacienteModal({ open, onOpenChange, medicoId, paciente, onSaved 
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {user?.tipo_acesso === 'clinica' && !isEdit && (
-              <div className="space-y-2 md:col-span-2">
+        <Tabs defaultValue="dados">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="dados">Dados Pessoais</TabsTrigger>
+            <TabsTrigger value="clinico">Prontuário & Histórico</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="dados" className="space-y-6 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {user?.tipo_acesso === 'clinica' && !isEdit && (
+                <div className="space-y-2 md:col-span-2">
+                  <Label>
+                    Médico Responsável <span className="text-red-500">*</span>
+                  </Label>
+                  <Select
+                    value={formData.medico_id}
+                    onValueChange={(v) => handleChange('medico_id', v)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um médico" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {medicos.map((m) => (
+                        <SelectItem key={m.id} value={m.id}>
+                          {m.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              <div className="space-y-2">
                 <Label>
-                  Médico Responsável <span className="text-red-500">*</span>
+                  Nome Completo <span className="text-red-500">*</span>
                 </Label>
-                <Select
-                  value={formData.medico_id}
-                  onValueChange={(v) => handleChange('medico_id', v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um médico" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {medicos.map((m) => (
-                      <SelectItem key={m.id} value={m.id}>
-                        {m.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Input
+                  value={formData.nome}
+                  onChange={(e) => handleChange('nome', e.target.value)}
+                  readOnly={isEdit}
+                  disabled={isEdit}
+                />
               </div>
-            )}
 
-            <div className="space-y-2">
-              <Label>
-                Nome Completo <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                value={formData.nome}
-                onChange={(e) => handleChange('nome', e.target.value)}
-                readOnly={isEdit}
-                disabled={isEdit}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label>
+                  Telefone (WhatsApp) <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  value={formData.telefone}
+                  onChange={handlePhoneChange}
+                  placeholder="(00) 00000-0000"
+                  readOnly={isEdit}
+                  disabled={isEdit}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label>
-                Telefone (WhatsApp) <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                value={formData.telefone}
-                onChange={handlePhoneChange}
-                placeholder="(00) 00000-0000"
-                readOnly={isEdit}
-                disabled={isEdit}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label>Data de Nascimento</Label>
+                <Input
+                  type="date"
+                  value={formData.data_nascimento}
+                  onChange={(e) => handleChange('data_nascimento', e.target.value)}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label>Data de Nascimento</Label>
-              <Input
-                type="date"
-                value={formData.data_nascimento}
-                onChange={(e) => handleChange('data_nascimento', e.target.value)}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label>CPF</Label>
+                <Input value={formData.cpf} onChange={handleCpfChange} placeholder="000.000.000-00" />
+              </div>
 
-            <div className="space-y-2">
-              <Label>CPF</Label>
-              <Input value={formData.cpf} onChange={handleCpfChange} placeholder="000.000.000-00" />
-            </div>
+              <div className="space-y-2">
+                <Label>Email</Label>
+                <Input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => handleChange('email', e.target.value)}
+                  placeholder="email@exemplo.com"
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label>Email</Label>
-              <Input
-                type="email"
-                value={formData.email}
-                onChange={(e) => handleChange('email', e.target.value)}
-                placeholder="email@exemplo.com"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Endereço Completo</Label>
-              <Input
-                value={formData.endereco}
-                onChange={(e) => handleChange('endereco', e.target.value)}
-              />
-            </div>
-          </div>
-
-          {customFieldsConfig.length > 0 && (
-            <div className="space-y-4 border-t pt-4">
-              <h4 className="font-semibold text-gray-700">Informações Clínicas</h4>
-              <div className="grid grid-cols-1 gap-4">
-                {customFieldsConfig.map((field) => (
-                  <div key={field.id} className="space-y-2">
-                    <Label>{field.nome_campo}</Label>
-                    {field.tipo === 'textarea' ? (
-                      <Textarea
-                        value={customData[field.nome_campo] || ''}
-                        onChange={(e) => handleCustomChange(field.nome_campo, e.target.value)}
-                        className="min-h-[80px]"
-                      />
-                    ) : field.tipo === 'date' ? (
-                      <Input
-                        type="date"
-                        value={customData[field.nome_campo] || ''}
-                        onChange={(e) => handleCustomChange(field.nome_campo, e.target.value)}
-                      />
-                    ) : field.tipo === 'number' ? (
-                      <Input
-                        type="number"
-                        value={customData[field.nome_campo] || ''}
-                        onChange={(e) => handleCustomChange(field.nome_campo, e.target.value)}
-                      />
-                    ) : (
-                      <Input
-                        value={customData[field.nome_campo] || ''}
-                        onChange={(e) => handleCustomChange(field.nome_campo, e.target.value)}
-                      />
-                    )}
-                  </div>
-                ))}
+              <div className="space-y-2">
+                <Label>Endereço Completo</Label>
+                <Input
+                  value={formData.endereco}
+                  onChange={(e) => handleChange('endereco', e.target.value)}
+                />
               </div>
             </div>
-          )}
-        </div>
+          </TabsContent>
+
+          <TabsContent value="clinico" className="space-y-6 py-4">
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-2">
+                <Label>Histórico de Retornos / Evolução</Label>
+                <Textarea
+                  value={customData['Histórico de Retornos'] || ''}
+                  onChange={(e) => handleCustomChange('Histórico de Retornos', e.target.value)}
+                  placeholder="Registre as datas e evoluções do paciente..."
+                  className="min-h-[100px] bg-[#f7f9fb]"
+                />
+              </div>
+
+              {customFieldsConfig.length > 0 && (
+                <>
+                  <h4 className="font-semibold text-gray-700 mt-4 border-t pt-4">Campos Customizados</h4>
+                  {customFieldsConfig.map((field) => (
+                    <div key={field.id} className="space-y-2">
+                      <Label>{field.nome_campo}</Label>
+                      {field.tipo === 'textarea' ? (
+                        <Textarea
+                          value={customData[field.nome_campo] || ''}
+                          onChange={(e) => handleCustomChange(field.nome_campo, e.target.value)}
+                          className="min-h-[80px]"
+                        />
+                      ) : field.tipo === 'date' ? (
+                        <Input
+                          type="date"
+                          value={customData[field.nome_campo] || ''}
+                          onChange={(e) => handleCustomChange(field.nome_campo, e.target.value)}
+                        />
+                      ) : field.tipo === 'number' ? (
+                        <Input
+                          type="number"
+                          value={customData[field.nome_campo] || ''}
+                          onChange={(e) => handleCustomChange(field.nome_campo, e.target.value)}
+                        />
+                      ) : (
+                        <Input
+                          value={customData[field.nome_campo] || ''}
+                          onChange={(e) => handleCustomChange(field.nome_campo, e.target.value)}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
