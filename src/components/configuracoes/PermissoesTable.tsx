@@ -109,7 +109,6 @@ function loadPermissions(): Resource[] {
   } catch (error) {
     // Ignore JSON parse errors and return defaults
   }
-  }
   return DEFAULT_PERMISSIONS
 }
 
