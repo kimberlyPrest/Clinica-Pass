@@ -130,7 +130,7 @@ export default function Index() {
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 animate-fade-in-down">
           <div className="flex items-start gap-4">
             <SidebarTrigger className="md:hidden mt-1" />
-          <div>
+            <div>
               <h1 className="text-[32px] font-bold font-display leading-tight text-[#191c1e]">
                 Visão Geral
               </h1>

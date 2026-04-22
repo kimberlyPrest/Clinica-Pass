@@ -147,10 +147,7 @@ export function ChartsSection({
                     stroke="none"
                   >
                     {pieData.map((_, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={PIE_COLORS[index % PIE_COLORS.length]}
-                      />
+                      <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                     ))}
                   </Pie>
                   <ChartTooltip content={<ChartTooltipContent />} />
@@ -166,10 +163,7 @@ export function ChartsSection({
           {/* Legend */}
           <div className="w-full space-y-3">
             {pieData.map((entry, i) => (
-              <div
-                key={entry.name}
-                className="flex items-center justify-between text-sm"
-              >
+              <div key={entry.name} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   <div
                     className="w-3 h-3 rounded-full shrink-0"

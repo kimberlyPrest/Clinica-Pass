@@ -83,10 +83,8 @@ export function KpiGrid({ data, loading }: { data: KpiData; loading?: boolean })
               <span
                 className={cn(
                   'text-[11px] font-semibold tracking-wide px-2 py-1 rounded-full flex items-center gap-1',
-                  item.trendType === 'positive' &&
-                    'bg-[#94f2f0]/30 text-[#006564]',
-                  item.trendType === 'warning' &&
-                    'bg-destructive/10 text-destructive',
+                  item.trendType === 'positive' && 'bg-[#94f2f0]/30 text-[#006564]',
+                  item.trendType === 'warning' && 'bg-destructive/10 text-destructive',
                 )}
               >
                 {item.trendType === 'positive' && <TrendingUp className="w-3 h-3" />}

@@ -33,9 +33,7 @@ function StatusBadge({ status }: { status: string }) {
     <span
       className={cn(
         'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold',
-        isConfirmed
-          ? 'bg-[#E6F2F2] text-[#05807f]'
-          : 'bg-[#e6e8ea] text-[#3e4948]',
+        isConfirmed ? 'bg-[#E6F2F2] text-[#05807f]' : 'bg-[#e6e8ea] text-[#3e4948]',
       )}
     >
       {status}
@@ -188,9 +186,7 @@ export function AppointmentsTable({ data, status, onRetry }: Props) {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-[#3e4948]">
-                      {app.doctorName}
-                    </TableCell>
+                    <TableCell className="px-4 py-3 text-[#3e4948]">{app.doctorName}</TableCell>
                     <TableCell className="px-4 py-3">
                       <div className="flex flex-col">
                         <span className="font-medium text-[#191c1e]">{app.date}</span>
