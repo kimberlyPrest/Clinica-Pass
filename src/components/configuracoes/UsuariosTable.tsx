@@ -43,8 +43,8 @@ export function UsuariosTable() {
         setUsers(
           usersData.map((u: any) => ({
             id: u.id,
-            name: u.name || u.email,
-            email: u.email,
+            name: u.name || u.email || 'Usuário',
+            email: u.email || '',
             tipo_acesso: u.tipo_acesso || 'medico',
             created: u.created,
             medicoId: medicoMap.get(u.id),
@@ -88,10 +88,10 @@ export function UsuariosTable() {
                 <div className="flex items-center gap-3">
                   <Avatar className="h-8 w-8 bg-primary/10 text-primary text-xs font-bold">
                     <AvatarFallback className="bg-transparent">
-                      {u.name.substring(0, 2).toUpperCase()}
+                      {(u.name || 'US').substring(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="font-medium">{u.name}</span>
+                  <span className="font-medium">{u.name || 'Usuário'}</span>
                 </div>
               </TableCell>
               <TableCell className="text-muted-foreground">{u.email}</TableCell>
