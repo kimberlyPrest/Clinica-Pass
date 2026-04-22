@@ -87,26 +87,28 @@ export function ChartsSection({ lineData, pieData }: { lineData: any[]; pieData:
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center h-[320px]">
           <div className="relative w-48 h-48 mb-6">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={0}
-                  dataKey="value"
-                  nameKey="name"
-                  stroke="none"
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />
-                  ))}
-                </Pie>
-                <ChartTooltip content={<ChartTooltipContent />} />
-              </PieChart>
-            </ResponsiveContainer>
+            <ChartContainer config={pieConfig} className="w-full h-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={0}
+                    dataKey="value"
+                    nameKey="name"
+                    stroke="none"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />
+                    ))}
+                  </Pie>
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                </PieChart>
+              </ResponsiveContainer>
+            </ChartContainer>
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <span className="text-3xl font-display font-bold text-accent">{total}</span>
             </div>
