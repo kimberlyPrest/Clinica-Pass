@@ -9,12 +9,7 @@ import { useRealtime } from '@/hooks/use-realtime'
 import { ReservaFiltros } from './components/ReservaFiltros'
 import { ReservaList } from './components/ReservaList'
 import { isSameDay, isThisWeek, isThisMonth } from 'date-fns'
-import {
-  PageWrapper,
-  PageHeader,
-  DSCard,
-  DSCardHeader,
-} from '@/components/ui/design-system'
+import { PageWrapper, PageHeader, DSCard, DSCardHeader } from '@/components/ui/design-system'
 
 export default function GestaoReservas() {
   const { user } = useAuth()
@@ -52,7 +47,9 @@ export default function GestaoReservas() {
     }
   }
 
-  useEffect(() => { loadData() }, [])
+  useEffect(() => {
+    loadData()
+  }, [])
   useRealtime('reservas', loadData)
   useRealtime('agendamentos', loadData)
 

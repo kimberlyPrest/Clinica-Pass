@@ -99,7 +99,10 @@ export default function MedicosList() {
             <div className="max-w-xs w-full">
               <DSSearchInput
                 value={search}
-                onChange={(v) => { setSearch(v); setPage(1) }}
+                onChange={(v) => {
+                  setSearch(v)
+                  setPage(1)
+                }}
                 placeholder="Buscar por nome, email ou especialidade..."
               />
             </div>
@@ -113,9 +116,7 @@ export default function MedicosList() {
               icon={UserX}
               title="Erro ao carregar médicos"
               description="Não foi possível conectar ao servidor. Tente novamente."
-              action={
-                <DSButtonSecondary onClick={loadData}>Tentar Novamente</DSButtonSecondary>
-              }
+              action={<DSButtonSecondary onClick={loadData}>Tentar Novamente</DSButtonSecondary>}
             />
           ) : (
             <>
@@ -212,7 +213,10 @@ export default function MedicosList() {
               <div className="grid grid-cols-1 gap-3 md:hidden">
                 {loading
                   ? Array.from({ length: 4 }).map((_, i) => (
-                      <div key={i} className="bg-white rounded-xl border border-[#e6e8ea] p-4 space-y-3">
+                      <div
+                        key={i}
+                        className="bg-white rounded-xl border border-[#e6e8ea] p-4 space-y-3"
+                      >
                         <div className="flex items-center gap-3">
                           <Skeleton className="w-10 h-10 rounded-full" />
                           <div className="space-y-2 flex-1">
@@ -230,7 +234,10 @@ export default function MedicosList() {
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <DSAvatar initials={getInitials(m.nome)} className="w-10 h-10 text-sm shrink-0" />
+                            <DSAvatar
+                              initials={getInitials(m.nome)}
+                              className="w-10 h-10 text-sm shrink-0"
+                            />
                             <div className="min-w-0">
                               <Link
                                 to={`/medicos/${m.id}`}
@@ -238,7 +245,9 @@ export default function MedicosList() {
                               >
                                 {m.nome}
                               </Link>
-                              <p className="text-xs text-[#6e7979] truncate">{m.especialidade || '—'}</p>
+                              <p className="text-xs text-[#6e7979] truncate">
+                                {m.especialidade || '—'}
+                              </p>
                             </div>
                           </div>
                           <DSBadge variant={m.tipo === 'mensalista' ? 'teal' : 'peach'}>

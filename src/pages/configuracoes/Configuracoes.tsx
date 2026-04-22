@@ -7,10 +7,7 @@ import { PageWrapper, PageHeader, DSCard, DSCardHeader } from '@/components/ui/d
 export default function Configuracoes() {
   return (
     <PageWrapper>
-      <PageHeader
-        title="Configurações"
-        subtitle="Gerencie usuários e permissões do sistema"
-      />
+      <PageHeader title="Configurações" subtitle="Gerencie usuários e permissões do sistema" />
 
       <Tabs defaultValue="usuarios">
         {/* Custom tab bar */}

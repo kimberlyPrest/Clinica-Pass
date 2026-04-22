@@ -124,7 +124,7 @@ export default function Agenda() {
 
   return (
     <div className="flex flex-col h-full bg-[#f7f9fb]">
-      <header className="flex flex-wrap items-center justify-between px-6 py-3 bg-white border-b border-[#e6e8ea] gap-3 shadow-[0_1px_3px_rgba(5,128,127,0.06)]">        
+      <header className="flex flex-wrap items-center justify-between px-6 py-3 bg-white border-b border-[#e6e8ea] gap-3 shadow-[0_1px_3px_rgba(5,128,127,0.06)]">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setCurrentDate(new Date())}
@@ -146,7 +146,9 @@ export default function Agenda() {
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
-          <h2 className="text-sm font-semibold capitalize text-[#191c1e] min-w-[150px]">{headerText}</h2>
+          <h2 className="text-sm font-semibold capitalize text-[#191c1e] min-w-[150px]">
+            {headerText}
+          </h2>
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
@@ -234,7 +236,9 @@ export default function Agenda() {
             <SelectContent>
               <SelectItem value="all">Todos Médicos</SelectItem>
               {medicos.map((m) => (
-                <SelectItem key={m.id} value={m.id}>{m.nome}</SelectItem>
+                <SelectItem key={m.id} value={m.id}>
+                  {m.nome}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -246,7 +250,9 @@ export default function Agenda() {
             <SelectContent>
               <SelectItem value="all">Todas Salas</SelectItem>
               {salas.map((s) => (
-                <SelectItem key={s.id} value={s.id}>{s.nome}</SelectItem>
+                <SelectItem key={s.id} value={s.id}>
+                  {s.nome}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>

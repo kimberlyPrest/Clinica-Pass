@@ -10,18 +10,18 @@ import { ReactNode } from 'react'
 
 // ─── COLOR TOKENS ──────────────────────────────────────────────────────────────
 export const DS = {
-  bg: '#f7f9fb',           // surface / page background
-  card: '#ffffff',         // card background
-  border: '#e6e8ea',       // card/table border
-  borderSub: '#eceef0',    // row dividers
-  primary: '#05807f',      // teal — main brand color
-  primaryDark: '#006564',  // darker teal for text on light
-  secondary: '#f0dfd5',    // peach — secondary container
+  bg: '#f7f9fb', // surface / page background
+  card: '#ffffff', // card background
+  border: '#e6e8ea', // card/table border
+  borderSub: '#eceef0', // row dividers
+  primary: '#05807f', // teal — main brand color
+  primaryDark: '#006564', // darker teal for text on light
+  secondary: '#f0dfd5', // peach — secondary container
   secondaryDim: '#d3c3ba', // peach darker (hover)
-  tealLight: '#94f2f0',    // light teal (badge bg, avatar bg)
-  textMain: '#191c1e',     // on-surface (headlines, bold text)
-  textSub: '#3e4948',      // on-surface-variant (secondary text)
-  textMuted: '#6e7979',    // outline (captions, labels)
+  tealLight: '#94f2f0', // light teal (badge bg, avatar bg)
+  textMain: '#191c1e', // on-surface (headlines, bold text)
+  textSub: '#3e4948', // on-surface-variant (secondary text)
+  textMuted: '#6e7979', // outline (captions, labels)
   shadow: '0_2px_4px_rgba(5,128,127,0.04)',
 } as const
 

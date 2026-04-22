@@ -110,7 +110,9 @@ export default function SalasList() {
     }
   }
 
-  useEffect(() => { loadData() }, [])
+  useEffect(() => {
+    loadData()
+  }, [])
   useRealtime('salas', () => loadData())
   useRealtime('bloqueios', () => loadData())
   useRealtime('reservas', () => loadData())
