@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-22T18:23:42.860Z",
+  "generatedAt": "2026-04-22T18:30:09.221Z",
   "collections": [
     {
       "name": "users",
@@ -172,6 +172,12 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "dias_funcionamento",
+          "type": "json",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": []
@@ -326,7 +332,14 @@
           "type": "select",
           "required": true,
           "system": false,
-          "selectValues": ["pontual", "diario", "semanal", "mensal", "periodo"]
+          "selectValues": [
+            "pontual",
+            "diario",
+            "semanal",
+            "mensal",
+            "periodo",
+            "recorrencia_complexa"
+          ]
         },
         {
           "name": "data_inicio",

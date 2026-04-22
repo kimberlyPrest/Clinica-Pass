@@ -44,7 +44,7 @@ export default function Layout() {
     : [
         { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
         { icon: Stethoscope, label: 'Médicos', path: '/medicos' },
-        { icon: DoorOpen, label: 'Salas', path: '/salas' },
+        { icon: DoorOpen, label: 'Salas', path: '/gestao-salas' },
         { icon: CalendarDays, label: 'Agenda', path: '/agenda' },
       ]
 
