@@ -82,7 +82,7 @@ export default function GestaoReservas() {
   }
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 animate-fade-in-up bg-[#f7e6dc] min-h-[calc(100vh-4rem)]">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 animate-fade-in-up min-h-[calc(100vh-4rem)] bg-[#ffffff]">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-xl shadow-sm">
         <div>
           <h1 className="text-3xl font-display font-bold tracking-tight text-[#05807f]">
