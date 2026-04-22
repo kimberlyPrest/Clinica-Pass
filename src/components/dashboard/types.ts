@@ -10,11 +10,12 @@ export interface DashboardFilters {
 export interface Appointment {
   id: string
   patientName: string
-  phone: string
-  time: string
+  patientInitials: string
   doctorName: string
+  date: string
+  time: string
   room: string
-  type: string
+  status: 'Confirmado' | 'Aguardando'
 }
 
 export interface KpiData {

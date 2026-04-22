@@ -1,103 +1,63 @@
 import { DashboardFilters, Appointment, KpiData } from './types'
 
 export const MOCK_ROOMS = ['Sala 1', 'Sala 2', 'Sala 3']
-
 export const MOCK_DOCTOR_TYPES = ['Mensalista', 'Avulso']
 
 export const generateDashboardData = (filters: DashboardFilters) => {
-  const baseAppointments: Appointment[] = [
+  const appointments: Appointment[] = [
     {
       id: '1',
-      patientName: 'João Pereira',
-      phone: '(11) 98765-4321',
-      time: '09:00',
-      doctorName: 'Dr. Carlos Oliveira',
-      room: 'Sala 1',
-      type: 'Mensalista',
+      patientName: 'Maria Costa',
+      patientInitials: 'MC',
+      doctorName: 'Dr. Silva (Cardio)',
+      date: 'Hoje',
+      time: '14:30',
+      room: 'Cons. 04',
+      status: 'Confirmado',
     },
     {
       id: '2',
-      patientName: 'Maria Costa',
-      phone: '(11) 99876-5432',
-      time: '10:00',
-      doctorName: 'Dra. Ana Silva',
-      room: 'Sala 2',
-      type: 'Avulso',
+      patientName: 'João Oliveira',
+      patientInitials: 'JO',
+      doctorName: 'Dra. Ana (Geral)',
+      date: 'Hoje',
+      time: '15:00',
+      room: 'Cons. 01',
+      status: 'Aguardando',
     },
     {
       id: '3',
-      patientName: 'Pedro Alves',
-      phone: '(11) 97654-3210',
-      time: '14:00',
-      doctorName: 'Dr. Felipe Santos',
-      room: 'Sala 3',
-      type: 'Mensalista',
-    },
-    {
-      id: '4',
-      patientName: 'Juliana Rocha',
-      phone: '(11) 91234-5678',
-      time: '15:00',
-      doctorName: 'Dr. Carlos Oliveira',
-      room: 'Sala 1',
-      type: 'Mensalista',
-    },
-    {
-      id: '5',
-      patientName: 'Lucas Mendes',
-      phone: '(11) 92345-6789',
-      time: '16:00',
-      doctorName: 'Dra. Ana Silva',
-      room: 'Sala 2',
-      type: 'Avulso',
-    },
-    {
-      id: '6',
-      patientName: 'Mariana Pires',
-      phone: '(11) 93456-7890',
-      time: '17:00',
-      doctorName: 'Dr. Felipe Santos',
-      room: 'Sala 3',
-      type: 'Mensalista',
+      patientName: 'Roberto Alves',
+      patientInitials: 'RA',
+      doctorName: 'Dr. Mendes (Orto)',
+      date: 'Amanhã',
+      time: '09:15',
+      room: 'Sala Exame B',
+      status: 'Confirmado',
     },
   ]
 
-  const filteredAppointments = baseAppointments.filter((app) => {
-    if (!filters.rooms.includes(app.room)) return false
-    if (!filters.doctorTypes.includes(app.type)) return false
-    return true
-  })
-
-  const minOcc = filters.occupancy[0]
-  const maxOcc = filters.occupancy[1]
-  const dynamicOcc = minOcc === maxOcc ? minOcc : Math.floor(minOcc + (maxOcc - minOcc) * 0.8)
-
   const kpiData: KpiData = {
-    occupancyRate: Math.max(0, Math.min(100, dynamicOcc)),
-    activeDoctors:
-      filters.doctorTypes.length === 2 ? 3 : filters.doctorTypes.includes('Mensalista') ? 2 : 1,
-    availableRooms: Math.max(0, 3 - filters.rooms.length),
-    upcomingAppointments:
-      filteredAppointments.length *
-      (filters.period === 'Mês' ? 4 : filters.period === 'Semana' ? 2 : 1),
+    occupancyRate: 86.4,
+    activeDoctors: 24,
+    availableRooms: 3,
+    upcomingAppointments: 184,
   }
 
-  const lineChartData = Array.from({ length: 7 }).map((_, i) => {
-    const val = minOcc + ((maxOcc - minOcc) * (Math.sin(i * 1.5) + 1)) / 2
-    return {
-      day: `Dia ${i + 1}`,
-      occupancy: Math.min(100, Math.max(0, Math.floor(val))),
-    }
-  })
+  const lineChartData = [
+    { day: '01', occupancy: 40 },
+    { day: '05', occupancy: 45 },
+    { day: '10', occupancy: 65 },
+    { day: '15', occupancy: 50 },
+    { day: '20', occupancy: 95 },
+    { day: '25', occupancy: 60 },
+  ]
 
-  const pieChartData = MOCK_ROOMS.filter((room) => filters.rooms.includes(room)).map((room) => ({
-    name: room,
-    value: Math.max(
-      1,
-      filteredAppointments.filter((a) => a.room === room).length * 2 +
-        Math.floor(Math.random() * 5),
-    ),
-  }))
+  const pieChartData = [
+    { name: 'Consultórios', value: 12, percent: 45 },
+    { name: 'Salas de Exame', value: 8, percent: 30 },
+    { name: 'Procedimentos', value: 7, percent: 25 },
+  ]
 
-  return { appointments: filteredAppointments, kpiData, lineChartData, pieChartData }
+  return { appointments, kpiData, lineChartData, pieChartData }
 }

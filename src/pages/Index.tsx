@@ -9,6 +9,11 @@ import {
   MOCK_ROOMS,
   MOCK_DOCTOR_TYPES,
 } from '@/components/dashboard/mock-data'
+import { Bell, SlidersHorizontal } from 'lucide-react'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { SidebarTrigger } from '@/components/ui/sidebar'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 export default function Index() {
   const [filters, setFilters] = useState<DashboardFilters>({
@@ -39,20 +44,54 @@ export default function Index() {
   }, [filters, dashboardData.appointments.length])
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-4 md:p-8 font-sans transition-colors duration-500">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <header className="flex flex-col gap-2 mb-8 animate-fade-in-down">
-          <h1 className="text-3xl font-display font-bold tracking-tight text-primary">
-            Dashboard Clínica
-          </h1>
-          <p className="text-muted-foreground">
-            Monitore a ocupação, médicos e agendamentos em tempo real.
-          </p>
+    <div className="min-h-full bg-background text-foreground p-4 md:p-8 font-sans transition-colors duration-500">
+      <div className="max-w-6xl mx-auto space-y-8">
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 animate-fade-in-down">
+          <div className="flex items-start gap-4">
+            <SidebarTrigger className="md:hidden mt-1" />
+            <div>
+              <h1 className="text-3xl font-display font-bold tracking-tight text-foreground">
+                Visão Geral
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                Acompanhamento de performance da clínica hoje, 24 de Outubro.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 self-end md:self-auto">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="rounded-full bg-card shadow-sm border-none relative"
+                >
+                  <SlidersHorizontal className="w-5 h-5 text-muted-foreground" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-[340px] md:w-[600px] p-0 border-border/50 shadow-lg rounded-xl"
+                align="end"
+              >
+                <DashboardFiltersPanel filters={filters} onChange={setFilters} />
+              </PopoverContent>
+            </Popover>
+            <Button
+              variant="outline"
+              size="icon"
+              className="rounded-full bg-card shadow-sm border-none"
+            >
+              <Bell className="w-5 h-5 text-muted-foreground" />
+            </Button>
+            <Avatar className="w-10 h-10 border-2 border-card shadow-sm cursor-pointer">
+              <AvatarImage src="https://img.usecurling.com/ppl/thumbnail?gender=male&seed=1" />
+              <AvatarFallback>AD</AvatarFallback>
+            </Avatar>
+          </div>
         </header>
 
-        <section className="space-y-6">
-          <DashboardFiltersPanel filters={filters} onChange={setFilters} />
-
+        <section className="space-y-8">
           <KpiGrid data={dashboardData.kpiData} />
 
           <ChartsSection
@@ -60,14 +99,25 @@ export default function Index() {
             pieData={dashboardData.pieChartData}
           />
 
-          <div className="space-y-4 animate-fade-in-up" style={{ animationDelay: '600ms' }}>
-            <div className="flex items-center justify-between mt-8">
-              <h2 className="text-xl font-display font-semibold text-primary">
-                Próximos Agendamentos
-              </h2>
-              <span className="text-sm font-medium text-muted-foreground bg-muted px-3 py-1 rounded-full">
-                Últimas 24h e Próximas 48h
-              </span>
+          <div
+            className="space-y-4 animate-fade-in-up bg-card p-6 rounded-2xl shadow-sm border border-border/50"
+            style={{ animationDelay: '600ms' }}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-display font-bold text-foreground">
+                  Próximos Agendamentos
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Visão das últimas 24h e próximas 48h
+                </p>
+              </div>
+              <Button
+                variant="secondary"
+                className="bg-secondary/40 hover:bg-secondary/60 text-primary font-bold"
+              >
+                VER TODOS
+              </Button>
             </div>
             <AppointmentsTable
               data={dashboardData.appointments}

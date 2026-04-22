@@ -9,7 +9,7 @@
 @layer base {
   :root {
     /* ClinicPro Design System */
-    --background: 22 63% 92%; /* #f7e6dc */
+    --background: 210 33% 98%; /* #f7f9fb */
     --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
@@ -18,24 +18,24 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 180 93% 26%; /* #05807f */
+    --primary: 180 100% 20%; /* #006564 */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 98%;
-    --secondary-foreground: 222.2 84% 4.9%;
+    --secondary: 22 51% 89%; /* #f0dfd5 */
+    --secondary-foreground: 180 100% 20%;
 
-    --muted: 210 40% 98%;
+    --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 98%;
-    --accent-foreground: 222.2 84% 4.9%;
+    --accent: 180 93% 26%; /* #05807f */
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 180 100% 20%;
 
     --radius: 0.5rem;
 

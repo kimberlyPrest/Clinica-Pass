@@ -13,7 +13,7 @@ export function DashboardFiltersPanel({ filters, onChange }: FiltersProps) {
   const periods: Period[] = ['Dia', 'Semana', 'Mês']
 
   return (
-    <div className="bg-card p-6 rounded-lg shadow-sm border space-y-6">
+    <div className="bg-card p-6 rounded-xl space-y-6">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div className="space-y-3">
           <h2 className="text-sm font-display font-semibold text-muted-foreground">Período</h2>
