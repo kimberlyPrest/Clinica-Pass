@@ -15,6 +15,9 @@ import Dashboard from './pages/medico/Dashboard'
 import Reservas from './pages/medico/Reservas'
 import Calendario from './pages/medico/Calendario'
 import Pacientes from './pages/medico/Pacientes'
+import GestaoReservas from './pages/gestao-reservas/GestaoReservas'
+import Configuracoes from './pages/configuracoes/Configuracoes'
+import Perfil from './pages/perfil/Perfil'
 import { AuthProvider } from './hooks/use-auth'
 
 const App = () => (
@@ -37,6 +40,10 @@ const App = () => (
               <Route path="/medicos/:id" element={<MedicoDetails />} />
               <Route path="/gestao-salas" element={<SalasList />} />
               <Route path="/agenda" element={<Agenda />} />
+              <Route path="/gestao-reservas" element={<GestaoReservas />} />
+              <Route path="/configuracoes" element={<Configuracoes />} />
+              <Route path="/perfil" element={<Perfil />} />
+              <Route path="/perfil/editar" element={<Configuracoes />} />
             </Route>
           </Route>
 

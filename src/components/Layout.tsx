@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/use-auth'
 import pb from '@/lib/pocketbase/client'
@@ -10,25 +11,52 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
+  SidebarTrigger,
+  useSidebar,
 } from '@/components/ui/sidebar'
 import {
   LayoutDashboard,
   Stethoscope,
   DoorOpen,
   CalendarDays,
-  Building2,
+  Settings,
   LogOut,
-  User,
+  User as UserIcon,
   Users,
+  ChevronUp,
+  ClipboardList,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
 
-export default function Layout() {
+function LayoutContent() {
   const location = useLocation()
   const navigate = useNavigate()
   const { user, signOut } = useAuth()
+  const { setOpen } = useSidebar()
+
+  useEffect(() => {
+    const handleResize = () => {
+      // Collapse on tablet (768px - 1024px)
+      if (window.innerWidth >= 768 && window.innerWidth < 1024) {
+        setOpen(false)
+      } else if (window.innerWidth >= 1024) {
+        setOpen(true)
+      }
+    }
+    window.addEventListener('resize', handleResize)
+    handleResize() // init
+    return () => window.removeEventListener('resize', handleResize)
+  }, [setOpen])
 
   const handleLogout = () => {
     signOut()
@@ -37,101 +65,198 @@ export default function Layout() {
 
   const isMedico = user?.tipo_acesso === 'medico'
 
-  const navItems = isMedico
-    ? [
-        { icon: LayoutDashboard, label: 'Dashboard', path: '/medico/dashboard' },
-        { icon: CalendarDays, label: 'Meu Calendário', path: '/medico/calendario' },
-        { icon: DoorOpen, label: 'Minhas Reservas', path: '/medico/reservas' },
-        { icon: Users, label: 'Meus Pacientes', path: '/medico/pacientes' },
-      ]
-    : [
-        { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-        { icon: Stethoscope, label: 'Médicos', path: '/medicos' },
-        { icon: DoorOpen, label: 'Salas', path: '/gestao-salas' },
-        { icon: CalendarDays, label: 'Agenda', path: '/agenda' },
-      ]
+  const clinicaNavItems = [
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+    { icon: Stethoscope, label: 'Médicos', path: '/medicos' },
+    { icon: DoorOpen, label: 'Salas', path: '/gestao-salas' },
+    { icon: CalendarDays, label: 'Agenda', path: '/agenda' },
+    { icon: ClipboardList, label: 'Gestão Reservas', path: '/gestao-reservas' },
+    { icon: Settings, label: 'Configurações', path: '/configuracoes' },
+  ]
+
+  const medicoNavItems = [
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/medico/dashboard' },
+    { icon: ClipboardList, label: 'Minhas Reservas', path: '/medico/reservas' },
+    { icon: CalendarDays, label: 'Calendário', path: '/medico/calendario' },
+    { icon: Users, label: 'Pacientes', path: '/medico/pacientes' },
+    { icon: Settings, label: 'Configurações', path: '/configuracoes' },
+  ]
+
+  const navItems = isMedico ? medicoNavItems : clinicaNavItems
 
   const avatarUrl = user?.avatar ? pb.files.getURL(user, user.avatar) : ''
-  const displayRole = isMedico ? 'Médico' : 'Admin Clínica'
+  const displayRole = isMedico ? 'Médico' : 'Clínica'
+  const initials = user?.name
+    ? user.name
+        .split(' ')
+        .map((n: string) => n[0])
+        .join('')
+        .substring(0, 2)
+        .toUpperCase()
+    : 'US'
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
-        <Sidebar className="border-r bg-card/50">
-          <SidebarHeader className="p-6 border-b border-border/50">
-            <div className="flex flex-col items-center gap-4 text-center mt-4">
-              <Avatar className="w-16 h-16 shadow-sm border-2 border-primary/20">
-                <AvatarImage src={avatarUrl} alt={user?.name || 'User'} />
-                <AvatarFallback className="bg-primary/10 text-primary">
-                  {user?.name ? user.name.charAt(0).toUpperCase() : <User className="w-8 h-8" />}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <h2 className="text-xl font-display font-bold text-primary">
-                  {user?.name || 'Usuário'}
-                </h2>
-                <p className="text-xs text-muted-foreground mt-1 capitalize">{displayRole}</p>
-              </div>
+    <div className="flex min-h-screen w-full bg-background transition-all duration-200 ease-in-out">
+      <Sidebar
+        collapsible="icon"
+        className="border-[#bdc9c8] [&_[data-sidebar=sidebar]]:bg-[#f7f9fb] transition-all duration-200 ease-in-out z-20"
+      >
+        <SidebarHeader className="h-[80px] p-4 flex flex-col justify-center border-b border-[#bdc9c8]/30 overflow-hidden">
+          <div className="flex items-center gap-3 h-full w-full">
+            <div className="w-8 h-8 rounded-md bg-[#05807f] flex items-center justify-center shrink-0 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:h-10 transition-all duration-200">
+              <Stethoscope className="w-5 h-5 text-white group-data-[collapsible=icon]:w-6 group-data-[collapsible=icon]:h-6 transition-all" />
             </div>
-          </SidebarHeader>
-          <SidebarContent className="px-4 py-8">
-            <SidebarMenu>
-              {navItems.map((item) => {
-                const isActive = location.pathname === item.path
-                return (
-                  <SidebarMenuItem key={item.label}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive}
-                      className={cn(
-                        'h-12 px-4 mb-2 rounded-lg transition-all',
-                        isActive
-                          ? 'bg-secondary/40 text-primary font-bold relative overflow-hidden before:absolute before:left-0 before:top-0 before:h-full before:w-1.5 before:bg-primary before:rounded-r-md'
-                          : 'text-muted-foreground hover:bg-secondary/20 hover:text-primary',
-                      )}
-                    >
-                      <Link to={item.path} className="flex items-center gap-3">
-                        <item.icon
-                          className={cn(
-                            'w-5 h-5',
-                            isActive ? 'text-primary' : 'text-muted-foreground',
-                          )}
-                        />
-                        <span className="text-sm">{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              })}
-            </SidebarMenu>
-          </SidebarContent>
-          <SidebarFooter className="p-6 space-y-4 border-t border-border/50">
-            {!isMedico && (
-              <Button
-                variant="secondary"
-                className="w-full justify-start gap-3 bg-secondary/30 hover:bg-secondary/50 text-primary font-bold"
-              >
-                <Building2 className="w-4 h-4" />
-                SELECIONAR UNIDADE
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              onClick={handleLogout}
-              className="w-full justify-center gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-            >
-              <LogOut className="w-4 h-4" />
-              Sair
-            </Button>
-          </SidebarFooter>
-        </Sidebar>
-
-        <main className="flex-1 flex flex-col min-h-0 overflow-hidden">
-          <div className="flex-1 overflow-y-auto">
-            <Outlet />
+            <h1 className="text-[20px] font-display font-bold text-[#05807f] truncate group-data-[collapsible=icon]:hidden transition-all duration-200">
+              ClinicPro
+            </h1>
           </div>
-        </main>
-      </div>
+        </SidebarHeader>
+
+        <SidebarContent className="p-0 overflow-y-auto overflow-x-hidden">
+          <SidebarMenu className="gap-4 px-6 group-data-[collapsible=icon]:px-2 py-6">
+            {navItems.map((item) => {
+              const isActive =
+                location.pathname === item.path ||
+                (location.pathname.startsWith(item.path + '/') && item.path !== '/')
+              return (
+                <SidebarMenuItem key={item.label} className="transition-all duration-200">
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive}
+                    tooltip={item.label}
+                    className={cn(
+                      'h-12 px-4 rounded-lg transition-all duration-200 font-sans text-[14px] w-full',
+                      isActive
+                        ? '!bg-[#05807f] !text-white hover:!bg-[#05807f]/90'
+                        : 'text-muted-foreground hover:!bg-[#f0dfd5] hover:!text-[#05807f]',
+                      'group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center',
+                    )}
+                  >
+                    <Link to={item.path} className="flex items-center gap-3 w-full">
+                      <item.icon
+                        className={cn(
+                          'w-5 h-5 shrink-0 transition-colors',
+                          isActive
+                            ? 'text-white'
+                            : 'text-muted-foreground group-hover/menu-button:text-[#05807f]',
+                        )}
+                      />
+                      <span className="truncate group-data-[collapsible=icon]:hidden">
+                        {item.label}
+                      </span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )
+            })}
+          </SidebarMenu>
+        </SidebarContent>
+
+        <SidebarFooter className="h-[60px] p-0 border-t border-[#bdc9c8]/30">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <SidebarMenuButton
+                size="lg"
+                className="w-full h-full data-[state=open]:!bg-[#f0dfd5] data-[state=open]:!text-[#05807f] hover:!bg-[#f0dfd5] hover:!text-[#05807f] rounded-none px-6 group-data-[collapsible=icon]:px-2 transition-all duration-200"
+              >
+                <Avatar className="h-10 w-10 shrink-0 rounded-full border border-[#05807f]/20 group-data-[collapsible=icon]:mx-auto transition-all duration-200">
+                  <AvatarImage src={avatarUrl} alt={user?.name || 'User'} />
+                  <AvatarFallback className="bg-[#05807f]/10 text-[#05807f] font-bold">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden ml-3">
+                  <span className="truncate font-semibold text-foreground">
+                    {user?.name || 'Usuário'}
+                  </span>
+                  <span className="truncate text-xs mt-0.5">
+                    <Badge
+                      variant="secondary"
+                      className="px-1.5 py-0 text-[10px] uppercase font-bold bg-[#05807f]/10 text-[#05807f] border-none rounded"
+                    >
+                      {displayRole}
+                    </Badge>
+                  </span>
+                </div>
+                <ChevronUp className="ml-auto size-4 group-data-[collapsible=icon]:hidden text-muted-foreground" />
+              </SidebarMenuButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              side="top"
+              className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg shadow-elevation border-[#bdc9c8]/50"
+              align="end"
+              sideOffset={8}
+            >
+              <DropdownMenuLabel className="p-0 font-normal">
+                <div className="flex items-center gap-3 px-3 py-3 text-left text-sm border-b border-border/50">
+                  <Avatar className="h-9 w-9 rounded-full">
+                    <AvatarImage src={avatarUrl} alt={user?.name || ''} />
+                    <AvatarFallback className="bg-[#05807f]/10 text-[#05807f] font-bold">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold text-foreground">
+                      {user?.name || 'Usuário'}
+                    </span>
+                    <span className="truncate text-xs text-muted-foreground">{user?.email}</span>
+                  </div>
+                </div>
+              </DropdownMenuLabel>
+              <div className="p-1">
+                <DropdownMenuItem
+                  className="cursor-pointer gap-2 py-2 rounded-md focus:!bg-[#f0dfd5]/50 focus:!text-[#05807f]"
+                  asChild
+                >
+                  <Link to="/perfil">
+                    <UserIcon className="w-4 h-4 text-muted-foreground" /> Perfil
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="cursor-pointer gap-2 py-2 rounded-md focus:!bg-[#f0dfd5]/50 focus:!text-[#05807f]"
+                  asChild
+                >
+                  <Link to="/perfil/editar">
+                    <Settings className="w-4 h-4 text-muted-foreground" /> Editar Perfil
+                  </Link>
+                </DropdownMenuItem>
+              </div>
+              <DropdownMenuSeparator className="bg-border/50" />
+              <div className="p-1">
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="cursor-pointer gap-2 py-2 rounded-md text-muted-foreground focus:!text-[#05807f] focus:!bg-[#f0dfd5]/50 group"
+                >
+                  <LogOut className="w-4 h-4 group-focus:text-[#05807f] transition-colors" /> Sair
+                </DropdownMenuItem>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </SidebarFooter>
+      </Sidebar>
+
+      <main className="flex-1 flex flex-col min-h-0 overflow-hidden bg-background">
+        <header className="h-16 border-b border-border/50 flex items-center px-4 md:hidden shrink-0 bg-card/80 backdrop-blur-md sticky top-0 z-10">
+          <SidebarTrigger className="mr-3 text-muted-foreground hover:text-foreground" />
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded bg-[#05807f] flex items-center justify-center">
+              <Stethoscope className="w-3.5 h-3.5 text-white" />
+            </div>
+            <h1 className="font-display font-bold text-lg text-[#05807f]">ClinicPro</h1>
+          </div>
+        </header>
+        <div className="flex-1 overflow-y-auto w-full max-w-[100vw]">
+          <Outlet />
+        </div>
+      </main>
+    </div>
+  )
+}
+
+export default function Layout() {
+  return (
+    <SidebarProvider>
+      <LayoutContent />
     </SidebarProvider>
   )
 }
