@@ -35,6 +35,18 @@ export default function Login() {
         setError('Sua conta foi desativada. Contate o administrador.')
       else setError('Erro ao entrar. Tente novamente.')
       setLoading(false)
+    } else {
+      const currentMonth = new Date().toISOString().slice(0, 7)
+      const lastRun = localStorage.getItem('last_reserva_gen_month')
+      if (lastRun !== currentMonth) {
+        try {
+          const { gerarReservasMensalistas } = await import('@/services/reservas')
+          await gerarReservasMensalistas()
+          localStorage.setItem('last_reserva_gen_month', currentMonth)
+        } catch (err) {
+          console.error('Erro ao gerar reservas mensalistas:', err)
+        }
+      }
     }
   }
 
