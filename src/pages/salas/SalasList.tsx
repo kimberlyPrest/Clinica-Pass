@@ -8,8 +8,6 @@ import {
 } from '@/services/salas'
 import { getBloqueios, type Bloqueio } from '@/services/bloqueios'
 import { useRealtime } from '@/hooks/use-realtime'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
@@ -18,11 +16,20 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
-import { Plus, Search } from 'lucide-react'
+import { Plus, DoorOpen } from 'lucide-react'
 import { SalaCard } from './components/SalaCard'
 import { SalaFormModal } from './components/SalaFormModal'
 import { BloqueioFormModal } from './components/BloqueioFormModal'
 import { AgendaSala } from './components/AgendaSala'
+import {
+  PageWrapper,
+  PageHeader,
+  DSCard,
+  DSCardHeader,
+  DSSearchInput,
+  DSButtonPrimary,
+  DSEmptyState,
+} from '@/components/ui/design-system'
 
 interface SalaStats {
   ocupacao: number
@@ -82,20 +89,14 @@ export default function SalasList() {
   const loadData = async () => {
     try {
       const now = new Date()
-      const monthStart = startOfMonth(now)
-      const monthEnd = endOfMonth(now)
-
       const [s, b, todasReservas] = await Promise.all([
         getSalas(),
         getBloqueios(),
-        getTodasReservasdoMes(monthStart, monthEnd),
+        getTodasReservasdoMes(startOfMonth(now), endOfMonth(now)),
       ])
-
       setSalas(s)
       setBloqueios(b)
-
       const proximasReservas = await Promise.all(s.map((sala) => getProximaReservaDaSala(sala.id)))
-
       const newMap = new Map<string, SalaStats>()
       s.forEach((sala, i) => {
         newMap.set(sala.id, {
@@ -109,10 +110,7 @@ export default function SalasList() {
     }
   }
 
-  useEffect(() => {
-    loadData()
-  }, [])
-
+  useEffect(() => { loadData() }, [])
   useRealtime('salas', () => loadData())
   useRealtime('bloqueios', () => loadData())
   useRealtime('reservas', () => loadData())
@@ -128,77 +126,97 @@ export default function SalasList() {
   }, [salas, search, status, ocupacaoMin, statsMap])
 
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-display font-bold text-primary">Gestão de Salas</h1>
-          <p className="text-muted-foreground mt-1">
-            Gerencie disponibilidade, horários e bloqueios.
-          </p>
-        </div>
-        <Button
-          onClick={() => setModalSala({ open: true })}
-          className="bg-primary hover:bg-primary/90"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Nova Sala
-        </Button>
-      </div>
+    <PageWrapper>
+      <PageHeader
+        title="Gestão de Salas"
+        subtitle="Gerencie disponibilidade, horários e bloqueios"
+        action={
+          <DSButtonPrimary onClick={() => setModalSala({ open: true })}>
+            <Plus className="w-4 h-4" />
+            Nova Sala
+          </DSButtonPrimary>
+        }
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 bg-card p-4 rounded-xl shadow-sm border">
-        <div className="md:col-span-4 relative">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por nome..."
-            className="pl-9"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        <div className="md:col-span-3">
-          <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger>
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todas">Todos Status</SelectItem>
-              <SelectItem value="ativa">Ativa</SelectItem>
-              <SelectItem value="inativa">Inativa</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="md:col-span-5 flex flex-col justify-center px-2">
-          <span className="text-sm font-medium mb-2 text-muted-foreground">
-            Ocupação Mínima: {ocupacaoMin[0]}%
-          </span>
-          <Slider
-            value={ocupacaoMin}
-            onValueChange={setOcupacaoMin}
-            max={100}
-            step={5}
-            className="[&_[role=slider]]:bg-primary"
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredSalas.map((sala) => (
-          <SalaCard
-            key={sala.id}
-            sala={sala}
-            ocupacao={statsMap.get(sala.id)?.ocupacao ?? 0}
-            proximoUso={statsMap.get(sala.id)?.proximoUso ?? '...'}
-            onEdit={() => setModalSala({ open: true, sala })}
-            onBlock={() => setModalBloqueio({ open: true, salaId: sala.id })}
-            onOpenAgenda={() => setAgendaSala({ open: true, sala })}
-          />
-        ))}
-        {filteredSalas.length === 0 && (
-          <div className="col-span-full py-12 text-center text-muted-foreground">
-            Nenhuma sala encontrada com os filtros atuais.
+      {/* Filters Card */}
+      <DSCard>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+          <div className="md:col-span-4">
+            <label className="text-xs font-semibold text-[#6e7979] uppercase tracking-widest mb-2 block">
+              Buscar
+            </label>
+            <DSSearchInput
+              value={search}
+              onChange={setSearch}
+              placeholder="Buscar sala por nome..."
+            />
           </div>
-        )}
-      </div>
+
+          <div className="md:col-span-3">
+            <label className="text-xs font-semibold text-[#6e7979] uppercase tracking-widest mb-2 block">
+              Status
+            </label>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger className="border-[#e6e8ea] bg-white text-[#191c1e] focus:ring-[#05807f]/30 focus:border-[#05807f]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todas">Todos Status</SelectItem>
+                <SelectItem value="ativa">Ativa</SelectItem>
+                <SelectItem value="inativa">Inativa</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="md:col-span-5">
+            <label className="text-xs font-semibold text-[#6e7979] uppercase tracking-widest mb-2 block">
+              Ocupação Mínima: <span className="text-[#05807f] font-bold">{ocupacaoMin[0]}%</span>
+            </label>
+            <Slider
+              value={ocupacaoMin}
+              onValueChange={setOcupacaoMin}
+              max={100}
+              step={5}
+              className="[&_[role=slider]]:bg-[#05807f] [&_[role=slider]]:border-[#05807f] [&_.relative>span:first-child]:bg-[#05807f]"
+            />
+          </div>
+        </div>
+      </DSCard>
+
+      {/* Salas Grid */}
+      {filteredSalas.length === 0 ? (
+        <DSCard>
+          <DSEmptyState
+            icon={DoorOpen}
+            title="Nenhuma sala encontrada"
+            description={
+              search || status !== 'todas' || ocupacaoMin[0] > 0
+                ? 'Nenhuma sala corresponde aos filtros aplicados.'
+                : 'Nenhuma sala cadastrada ainda.'
+            }
+            action={
+              <DSButtonPrimary onClick={() => setModalSala({ open: true })}>
+                <Plus className="w-4 h-4" />
+                Adicionar Sala
+              </DSButtonPrimary>
+            }
+          />
+        </DSCard>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredSalas.map((sala) => (
+            <SalaCard
+              key={sala.id}
+              sala={sala}
+              ocupacao={statsMap.get(sala.id)?.ocupacao ?? 0}
+              proximoUso={statsMap.get(sala.id)?.proximoUso ?? '...'}
+              onEdit={() => setModalSala({ open: true, sala })}
+              onBlock={() => setModalBloqueio({ open: true, salaId: sala.id })}
+              onOpenAgenda={() => setAgendaSala({ open: true, sala })}
+            />
+          ))}
+        </div>
+      )}
 
       {modalSala.open && (
         <SalaFormModal
@@ -225,6 +243,6 @@ export default function SalasList() {
           onOpenChange={(op) => setAgendaSala({ open: op })}
         />
       )}
-    </div>
+    </PageWrapper>
   )
 }

@@ -123,43 +123,67 @@ export default function Agenda() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#f7e6dc]/30">
-      <header className="flex flex-wrap items-center justify-between p-4 bg-background border-b gap-4">
+    <div className="flex flex-col h-full bg-[#f7f9fb]">
+      <header className="flex flex-wrap items-center justify-between px-6 py-3 bg-white border-b border-[#e6e8ea] gap-3 shadow-[0_1px_3px_rgba(5,128,127,0.06)]">        
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => setCurrentDate(new Date())}>
+          <button
+            onClick={() => setCurrentDate(new Date())}
+            className="text-sm font-semibold px-3 py-1.5 rounded-lg border border-[#e6e8ea] bg-white hover:bg-[#f0dfd5] text-[#05807f] transition-colors duration-200"
+          >
             Hoje
-          </Button>
-          <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" onClick={() => navigateDate(-1)}>
+          </button>
+          <div className="flex items-center">
+            <button
+              onClick={() => navigateDate(-1)}
+              className="p-1.5 rounded-lg hover:bg-[#f0dfd5] text-[#3e4948] hover:text-[#05807f] transition-colors"
+            >
               <ChevronLeft className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => navigateDate(1)}>
+            </button>
+            <button
+              onClick={() => navigateDate(1)}
+              className="p-1.5 rounded-lg hover:bg-[#f0dfd5] text-[#3e4948] hover:text-[#05807f] transition-colors"
+            >
               <ChevronRight className="w-4 h-4" />
-            </Button>
+            </button>
           </div>
-          <h2 className="text-lg font-semibold capitalize min-w-[150px]">{headerText}</h2>
+          <h2 className="text-sm font-semibold capitalize text-[#191c1e] min-w-[150px]">{headerText}</h2>
         </div>
 
-        <div className="flex items-center gap-4 flex-wrap">
+        <div className="flex items-center gap-3 flex-wrap">
           <Tabs value={displayMode} onValueChange={(v: any) => setDisplayMode(v)}>
-            <TabsList>
-              <TabsTrigger value="calendar">
-                <CalendarDays className="w-4 h-4 mr-1" /> Calendário
+            <TabsList className="bg-[#f2f4f6] p-0.5 rounded-lg h-auto">
+              <TabsTrigger
+                value="calendar"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium text-[#6e7979] data-[state=active]:bg-white data-[state=active]:text-[#05807f] data-[state=active]:shadow-sm transition-all"
+              >
+                <CalendarDays className="w-3.5 h-3.5" /> Calendário
               </TabsTrigger>
-              <TabsTrigger value="list">
-                <List className="w-4 h-4 mr-1" /> Lista
+              <TabsTrigger
+                value="list"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium text-[#6e7979] data-[state=active]:bg-white data-[state=active]:text-[#05807f] data-[state=active]:shadow-sm transition-all"
+              >
+                <List className="w-3.5 h-3.5" /> Lista
               </TabsTrigger>
             </TabsList>
           </Tabs>
 
           {!isMobile && displayMode === 'calendar' && (
             <Tabs value={activeView} onValueChange={(v: any) => setView(v)}>
-              <TabsList>
-                <TabsTrigger value="day">Dia</TabsTrigger>
-                <TabsTrigger value="week">Semana</TabsTrigger>
-                <TabsTrigger value="month">Mês</TabsTrigger>
-                <TabsTrigger value="custom">
-                  <CalendarRange className="w-3.5 h-3.5 mr-1" /> Período
+              <TabsList className="bg-[#f2f4f6] p-0.5 rounded-lg h-auto">
+                {(['day', 'week', 'month'] as const).map((v) => (
+                  <TabsTrigger
+                    key={v}
+                    value={v}
+                    className="px-3 py-1.5 rounded-md text-xs font-medium text-[#6e7979] data-[state=active]:bg-white data-[state=active]:text-[#05807f] data-[state=active]:shadow-sm transition-all"
+                  >
+                    {v === 'day' ? 'Dia' : v === 'week' ? 'Semana' : 'Mês'}
+                  </TabsTrigger>
+                ))}
+                <TabsTrigger
+                  value="custom"
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium text-[#6e7979] data-[state=active]:bg-white data-[state=active]:text-[#05807f] data-[state=active]:shadow-sm transition-all"
+                >
+                  <CalendarRange className="w-3.5 h-3.5" /> Período
                 </TabsTrigger>
               </TabsList>
             </Tabs>
@@ -170,9 +194,9 @@ export default function Agenda() {
             <div className="flex items-center gap-2">
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm" className="text-xs h-8">
+                  <button className="text-xs font-medium px-3 py-1.5 rounded-lg border border-[#e6e8ea] bg-white hover:border-[#05807f] hover:text-[#05807f] text-[#3e4948] transition-colors">
                     {customStart ? format(customStart, 'dd/MM/yyyy') : 'Início'}
-                  </Button>
+                  </button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
@@ -183,12 +207,12 @@ export default function Agenda() {
                   />
                 </PopoverContent>
               </Popover>
-              <span className="text-muted-foreground text-xs">até</span>
+              <span className="text-[#6e7979] text-xs">até</span>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm" className="text-xs h-8">
+                  <button className="text-xs font-medium px-3 py-1.5 rounded-lg border border-[#e6e8ea] bg-white hover:border-[#05807f] hover:text-[#05807f] text-[#3e4948] transition-colors">
                     {customEnd ? format(customEnd, 'dd/MM/yyyy') : 'Fim'}
-                  </Button>
+                  </button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
@@ -204,43 +228,39 @@ export default function Agenda() {
           )}
 
           <Select value={selectedMedico} onValueChange={setSelectedMedico}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className="w-[160px] text-sm border-[#e6e8ea] bg-white focus:ring-[#05807f]/30 focus:border-[#05807f]">
               <SelectValue placeholder="Médico" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos Médicos</SelectItem>
               {medicos.map((m) => (
-                <SelectItem key={m.id} value={m.id}>
-                  {m.nome}
-                </SelectItem>
+                <SelectItem key={m.id} value={m.id}>{m.nome}</SelectItem>
               ))}
             </SelectContent>
           </Select>
 
           <Select value={selectedSala} onValueChange={setSelectedSala}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-[140px] text-sm border-[#e6e8ea] bg-white focus:ring-[#05807f]/30 focus:border-[#05807f]">
               <SelectValue placeholder="Sala" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas Salas</SelectItem>
               {salas.map((s) => (
-                <SelectItem key={s.id} value={s.id}>
-                  {s.nome}
-                </SelectItem>
+                <SelectItem key={s.id} value={s.id}>{s.nome}</SelectItem>
               ))}
             </SelectContent>
           </Select>
 
-          <Button
-            className="bg-[#05807f] hover:bg-[#05807f]/90 text-white"
+          <button
+            className="flex items-center gap-2 bg-[#05807f] hover:bg-[#006564] text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors duration-200"
             onClick={() => {
               setBookingInitialDate(undefined)
               setBookingInitialTime(undefined)
               setIsBookingOpen(true)
             }}
           >
-            <Plus className="w-4 h-4 mr-2" /> Reservar
-          </Button>
+            <Plus className="w-4 h-4" /> Reservar
+          </button>
         </div>
       </header>
 
