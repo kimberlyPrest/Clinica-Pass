@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Fragment } from 'react'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -143,7 +143,7 @@ export function PermissoesTable() {
         </TableHeader>
         <TableBody>
           {categories.map((category) => (
-            <>
+            <Fragment key={category}>
               <TableRow key={`cat-${category}`} className="bg-muted/10">
                 <TableCell
                   colSpan={3}
@@ -165,7 +165,7 @@ export function PermissoesTable() {
                     </TableCell>
                   </TableRow>
                 ))}
-            </>
+            </Fragment>
           ))}
         </TableBody>
       </Table>
