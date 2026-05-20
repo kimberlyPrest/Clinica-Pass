@@ -24,7 +24,6 @@
     "tsconfig.node.json",
     "vite.config.ts",
     "vite-plugin-react-uid.js"
-    "src/lib/skipAi.ts"
   ],
   "excludeFromContext": [
     "src/components/ui/**/*",
